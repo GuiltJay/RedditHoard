@@ -29,3 +29,7 @@ jobs:
       - name: Run scraper
         run: |
           python main.py
+
+      - name: Run Uploader
+        run: |
+          python tg.py
