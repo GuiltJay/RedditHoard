@@ -46,7 +46,7 @@ if missing_vars:
     exit(1)
 
 # Configuration
-POST_LIMIT = 100
+POST_LIMIT = 200
 MAX_WORKERS = 5
 REQUEST_DELAY = 0.3  # Delay between requests to avoid rate limiting
 
