@@ -13,20 +13,24 @@ from tqdm import tqdm
 
 # ================= CONFIG =================
 
-POST_LIMIT_HOME = 200
+FETCH_HOME = True
+FETCH_SAVED = True
+FETCH_SUBS = False 
+
+POST_LIMIT_HOME = 300
 POST_LIMIT_SAVED = 100
 POST_LIMIT_PER_SUB = 35
 MAX_RANDOM_SUBS = 50
 MAX_WORKERS = 12
 DOWNLOAD_DIR = "downloads"
 
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-existing_files = set(os.listdir(DOWNLOAD_DIR))
-
-# Only posts newer than 24 hours
+# Only posts newer than 24h
 CUTOFF = time.time() - 24 * 3600
 
-# ================= LOAD ENV =================
+# ================= SETUP =================
+
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+existing_files = set(os.listdir(DOWNLOAD_DIR))
 
 load_dotenv()
 
@@ -40,10 +44,16 @@ reddit = praw.Reddit(
 
 IMGUR_CLIENT_ID = os.getenv("IMGUR_CLIENT_ID")
 
+
 # ================= HELPERS =================
 
 def download_file(url, filename):
-    if not url or filename in existing_files:
+    if not url:
+        print(f"[WARN] No URL for {filename}, skipping")
+        return 0
+
+    if filename in existing_files:
+        print(f"[SKIP] Already downloaded: {filename}")
         return 0
 
     try:
@@ -53,13 +63,18 @@ def download_file(url, filename):
             with open(path, "wb") as f:
                 f.write(r.content)
             existing_files.add(filename)
+            print(f"[DOWNLOADED] {filename}")
             return 1
-    except:
-        pass
+        else:
+            print(f"[FAIL] {url} returned {r.status_code}")
+    except Exception as e:
+        print(f"[ERROR] Download error for {url}: {e}")
 
     return 0
 
+
 def merge_dash(video_path, audio_path, output_path):
+    print(f"[MERGE] Combining video + audio → {output_path}")
     cmd = [
         "ffmpeg", "-y",
         "-i", video_path,
@@ -68,9 +83,11 @@ def merge_dash(video_path, audio_path, output_path):
         output_path
     ]
     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
     for p in (video_path, audio_path):
         if os.path.exists(p):
             os.remove(p)
+
 
 # ================= MEDIA HANDLERS =================
 
@@ -92,17 +109,18 @@ def handle_reddit_video(submission, sub, created):
 
         download_file(video_url, tmp_v)
         download_file(audio_url, tmp_a)
-
         merge_dash(os.path.join(DOWNLOAD_DIR, tmp_v),
                    os.path.join(DOWNLOAD_DIR, tmp_a),
                    os.path.join(DOWNLOAD_DIR, final_name))
 
         return 1
+
     elif video_url:
         filename = f"{sub}-{submission.id}-{created}.mp4"
         return download_file(video_url, filename)
-    
+
     return 0
+
 
 def handle_gallery(submission, sub):
     if not submission.gallery_data:
@@ -117,6 +135,7 @@ def handle_gallery(submission, sub):
             filename = f"{sub}-{submission.id}-{media_id}.jpg"
             total += download_file(url, filename)
     return total
+
 
 def handle_redgifs(url, sub, sid, created):
     parts = urlparse(url).path.strip("/").split("/")
@@ -135,10 +154,11 @@ def handle_redgifs(url, sub, sid, created):
             if v:
                 filename = f"{sub}-{sid}-{created}.mp4"
                 return download_file(v, filename)
-    except:
-        pass
+    except Exception as e:
+        print(f"[ERROR] RedGifs parsing failed for {url}: {e}")
 
     return 0
+
 
 def handle_imgur(url, sub, sid, created):
     parsed = urlparse(url)
@@ -157,31 +177,36 @@ def handle_imgur(url, sub, sid, created):
                     fname = f"{sub}-{sid}-{img['id']}.jpg"
                     total += download_file(iurl, fname)
                 return total
-        except:
-            pass
+        except Exception as e:
+            print(f"[ERROR] Imgur album failed for {url}: {e}")
 
     direct = f"https://i.imgur.com/{path}.jpg"
     fname = f"{sub}-{sid}-{created}.jpg"
     return download_file(direct, fname)
 
+
 # ================= PROCESS =================
 
 def process_post(submission):
-    # Skip older than 24h
     if submission.created_utc < CUTOFF:
+        print(f"[SKIP] Older than 24h: {submission.id}")
         return 0
 
-    d = 0
     try:
-        if submission.crosspost_parent_list:
-            submission = submission.crosspost_parent_list[0]
+        cp = submission.crosspost_parent_list
+        if cp and isinstance(cp, list):
+            parent_id = cp[0].get("id")
+            if parent_id:
+                print(f"[CROSSPOST] Resolving parent {parent_id}")
+                submission = reddit.submission(id=parent_id)
     except:
         pass
+
+    d = 0
 
     url = submission.url
     sub = submission.subreddit.display_name
 
-    # Uses timezone-aware UTC datetime per Python 3.12 docs
     created = datetime.fromtimestamp(
         submission.created_utc, tz=timezone.utc
     ).strftime("%Y%m%d_%H%M%S")
@@ -190,64 +215,88 @@ def process_post(submission):
 
     try:
         if submission.gallery_data:
+            print(f"[GALLERY] {submission.id}")
             d += handle_gallery(submission, sub)
         elif submission.media:
+            print(f"[REDDIT VIDEO] {submission.id}")
             d += handle_reddit_video(submission, sub, created)
         elif "redgifs.com" in dom:
+            print(f"[REDGIFS] {url}")
             d += handle_redgifs(url, sub, submission.id, created)
         elif "imgur.com" in dom:
+            print(f"[IMGUR] {url}")
             d += handle_imgur(url, sub, submission.id, created)
         elif "i.redd.it" in dom or "preview.redd.it" in dom:
+            print(f"[IMAGE] {submission.id}")
             ext = os.path.splitext(url)[1] or ".jpg"
             fname = f"{sub}-{submission.id}-{created}{ext}"
             d += download_file(url, fname)
-    except:
-        pass
+        else:
+            print(f"[NO MEDIA] {submission.id} ({url})")
+    except Exception as e:
+        print(f"[ERROR] Media handler failed for {submission.id}: {e}")
 
     return d
+
 
 # ================= MAIN =================
 
 def main():
-    print("🔥 Reddit Hybrid Hoarder Engine (Last 24h Only)")
-
+    print("🔥 Reddit Hybrid Hoarder Engine (24h Only)")
     submissions = {}
+    count_before = len(submissions)
 
-    # 1️⃣ Home feed
-    print("Fetching home feed…")
-    for s in reddit.front.new(limit=POST_LIMIT_HOME):
-        if s.created_utc >= CUTOFF:
-            submissions[s.id] = s
-
-    # 2️⃣ Saved posts for user
-    print("Fetching saved posts…")
-    user = reddit.user.me()
-    for s in user.saved(limit=POST_LIMIT_SAVED):
-        if getattr(s, "created_utc", 0) >= CUTOFF:
-            submissions[s.id] = s
-
-    # 3️⃣ Random subscribed subreddits
-    print("Fetching subscribed subreddits…")
-    all_subs = list(reddit.user.subreddits(limit=None))
-    random.shuffle(all_subs)
-    chosen = all_subs[:MAX_RANDOM_SUBS]
-
-    for sub_obj in chosen:
-        print("✔", sub_obj.display_name)
-        for s in sub_obj.new(limit=POST_LIMIT_PER_SUB):
+    # 🏠 Home feed
+    if FETCH_HOME:
+        print("➡️ Fetching home feed…")
+        home_added = 0
+        for s in reddit.front.new(limit=POST_LIMIT_HOME):
             if s.created_utc >= CUTOFF:
                 submissions[s.id] = s
+                home_added += 1
+        print(f"[DONE] Home feed added: {home_added}")
 
-    print(f"\nTotal unique posts in last 24h: {len(submissions)}")
+    # 🗂 Saved posts
+    if FETCH_SAVED:
+        print("➡️ Fetching saved posts…")
+        saved_added = 0
+        user = reddit.user.me()
+        for s in user.saved(limit=POST_LIMIT_SAVED):
+            if getattr(s, "created_utc", 0) >= CUTOFF:
+                submissions[s.id] = s
+                saved_added += 1
+        print(f"[DONE] Saved posts added: {saved_added}")
 
-    total = 0
+    # 🌐 Subscribed random subs
+    if FETCH_SUBS:
+        print("➡️ Fetching subscribed subreddits…")
+        try:
+            all_subs = list(reddit.user.subreddits(limit=None))
+            random.shuffle(all_subs)
+            chosen = all_subs[:MAX_RANDOM_SUBS]
+
+            sub_added = 0
+            for sub_obj in chosen:
+                print(f"[SUB] {sub_obj.display_name}")
+                for s in sub_obj.new(limit=POST_LIMIT_PER_SUB):
+                    if s.created_utc >= CUTOFF:
+                        submissions[s.id] = s
+                        sub_added += 1
+            print(f"[DONE] Subscribed subs added: {sub_added}")
+        except Exception as e:
+            print(f"[WARN] Failed to fetch subscribed subs: {e}")
+
+    print(f"\n📊 Total unique posts collected: {len(submissions)}")
+    total_downloaded = 0
+
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
         futures = [pool.submit(process_post, s) for s in submissions.values()]
         for f in tqdm(as_completed(futures), total=len(futures)):
-            total += f.result()
+            total_downloaded += f.result()
 
     print("\n🔥 FINISHED")
-    print("Downloaded:", total)
+    print(f"📥 Total files downloaded: {total_downloaded}")
+
 
 if __name__ == "__main__":
     main()
