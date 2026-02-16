@@ -13,15 +13,18 @@ from tqdm import tqdm
 
 # ================= CONFIG =================
 
-POST_LIMIT_HOME = 200
-POST_LIMIT_SAVED = 50
-POST_LIMIT_PER_SUB = 25
+POST_LIMIT_HOME = 300
+POST_LIMIT_SAVED = 300
+POST_LIMIT_PER_SUB = 35
 MAX_RANDOM_SUBS = 50
-MAX_WORKERS = 10
+MAX_WORKERS = 12
 DOWNLOAD_DIR = "downloads"
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 existing_files = set(os.listdir(DOWNLOAD_DIR))
+
+# 24-hour cutoff (UTC)
+CUTOFF = time.time() - 24 * 3600
 
 # ================= LOAD ENV =================
 
@@ -65,11 +68,9 @@ def merge_dash(video_path, audio_path, output_path):
         output_path
     ]
     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-    if os.path.exists(video_path):
-        os.remove(video_path)
-    if os.path.exists(audio_path):
-        os.remove(audio_path)
+    for p in (video_path, audio_path):
+        if os.path.exists(p):
+            os.remove(p)
 
 # ================= MEDIA HANDLERS =================
 
@@ -85,104 +86,88 @@ def handle_reddit_video(submission, sub, created):
     if dash_url and "DASH" in dash_url:
         base = dash_url.rsplit("/", 1)[0]
         audio_url = base + "/DASH_audio.mp4"
-
-        video_tmp = f"{submission.id}_video.mp4"
-        audio_tmp = f"{submission.id}_audio.mp4"
+        tmp_v = f"{submission.id}_video.mp4"
+        tmp_a = f"{submission.id}_audio.mp4"
         final_name = f"{sub}-{submission.id}-{created}.mp4"
 
-        download_file(video_url, video_tmp)
-        download_file(audio_url, audio_tmp)
+        download_file(video_url, tmp_v)
+        download_file(audio_url, tmp_a)
 
-        merge_dash(
-            os.path.join(DOWNLOAD_DIR, video_tmp),
-            os.path.join(DOWNLOAD_DIR, audio_tmp),
-            os.path.join(DOWNLOAD_DIR, final_name)
-        )
+        merge_dash(os.path.join(DOWNLOAD_DIR, tmp_v),
+                   os.path.join(DOWNLOAD_DIR, tmp_a),
+                   os.path.join(DOWNLOAD_DIR, final_name))
 
-        existing_files.add(final_name)
         return 1
-
     elif video_url:
         filename = f"{sub}-{submission.id}-{created}.mp4"
         return download_file(video_url, filename)
-
     return 0
 
 
 def handle_gallery(submission, sub):
     if not submission.gallery_data:
         return 0
-
-    downloaded = 0
+    total = 0
     for item in submission.gallery_data["items"]:
         media_id = item["media_id"]
         meta = submission.media_metadata.get(media_id)
-
         if meta and meta.get("status") == "valid":
             url = meta["s"]["u"].replace("&amp;", "&")
             filename = f"{sub}-{submission.id}-{media_id}.jpg"
-            downloaded += download_file(url, filename)
+            total += download_file(url, filename)
+    return total
 
-    return downloaded
 
-
-def handle_redgifs(url, sub, submission_id, created):
+def handle_redgifs(url, sub, sid, created):
     parts = urlparse(url).path.strip("/").split("/")
     if not parts:
         return 0
-
     gif_id = parts[-1]
     if gif_id.lower() == "watch" and len(parts) > 1:
         gif_id = parts[-2]
-
     try:
-        r = requests.get(f"https://api.redgifs.com/v2/gifs/{gif_id}", timeout=15)
+        r = requests.get(f"https://api.redgifs.com/v2/gifs/{gif_id}", timeout=12)
         if r.status_code == 200:
             data = r.json()
-            video_url = data.get("gif", {}).get("urls", {}).get("hd")
-            if video_url:
-                filename = f"{sub}-{submission_id}-{created}.mp4"
-                return download_file(video_url, filename)
+            v = data.get("gif", {}).get("urls", {}).get("hd")
+            if v:
+                filename = f"{sub}-{sid}-{created}.mp4"
+                return download_file(v, filename)
     except:
         pass
-
     return 0
 
 
-def handle_imgur(url, sub, submission_id, created):
+def handle_imgur(url, sub, sid, created):
     parsed = urlparse(url)
     path = parsed.path.strip("/")
-
     if "/a/" in url or "/gallery/" in url:
         album_id = path.split("/")[-1]
         headers = {"Authorization": f"Client-ID {IMGUR_CLIENT_ID}"}
-
         try:
-            r = requests.get(
-                f"https://api.imgur.com/3/album/{album_id}/images",
-                headers=headers,
-                timeout=15
-            )
+            r = requests.get(f"https://api.imgur.com/3/album/{album_id}/images",
+                             headers=headers, timeout=12)
             if r.status_code == 200:
-                data = r.json()
                 total = 0
-                for img in data["data"]:
-                    img_url = img["link"]
-                    filename = f"{sub}-{submission_id}-{img['id']}.jpg"
-                    total += download_file(img_url, filename)
+                for img in r.json().get("data", []):
+                    iurl = img.get("link")
+                    fname = f"{sub}-{sid}-{img['id']}.jpg"
+                    total += download_file(iurl, fname)
                 return total
         except:
             pass
-
     direct = f"https://i.imgur.com/{path}.jpg"
-    filename = f"{sub}-{submission_id}-{created}.jpg"
-    return download_file(direct, filename)
+    fname = f"{sub}-{sid}-{created}.jpg"
+    return download_file(direct, fname)
 
 # ================= PROCESS =================
 
 def process_post(submission):
-    downloaded = 0
+    # Skip if older than 24h
+    if submission.created_utc < CUTOFF:
+        return 0
 
+    d = 0
     try:
         if submission.crosspost_parent_list:
             submission = submission.crosspost_parent_list[0]
@@ -191,72 +176,69 @@ def process_post(submission):
 
     url = submission.url
     sub = submission.subreddit.display_name
-    created = datetime.fromtimestamp(submission.created_utc).strftime("%Y%m%d_%H%M%S")
-    domain = urlparse(url).netloc.lower()
+    created = datetime.utcfromtimestamp(submission.created_utc).strftime("%Y%m%d_%H%M%S")
+    dom = urlparse(url).netloc.lower()
 
     try:
         if submission.gallery_data:
-            downloaded += handle_gallery(submission, sub)
-
+            d += handle_gallery(submission, sub)
         elif submission.media:
-            downloaded += handle_reddit_video(submission, sub, created)
-
-        elif "redgifs.com" in domain:
-            downloaded += handle_redgifs(url, sub, submission.id, created)
-
-        elif "imgur.com" in domain:
-            downloaded += handle_imgur(url, sub, submission.id, created)
-
-        elif "i.redd.it" in domain or "preview.redd.it" in domain:
+            d += handle_reddit_video(submission, sub, created)
+        elif "redgifs.com" in dom:
+            d += handle_redgifs(url, sub, submission.id, created)
+        elif "imgur.com" in dom:
+            d += handle_imgur(url, sub, submission.id, created)
+        elif "i.redd.it" in dom or "preview.redd.it" in dom:
             ext = os.path.splitext(url)[1] or ".jpg"
-            filename = f"{sub}-{submission.id}-{created}{ext}"
-            downloaded += download_file(url, filename)
-
+            fname = f"{sub}-{submission.id}-{created}{ext}"
+            d += download_file(url, fname)
     except:
         pass
 
-    return downloaded
+    return d
 
 # ================= MAIN =================
 
 def main():
-    print("🔥 Hybrid Reddit Hoarder Engine")
+    print("🔥 Reddit Hybrid Hoarder Engine (Last 24h Only)")
 
     submissions = {}
-    user = reddit.user.me()
 
-    # 1️⃣ Home feed
-    print("Fetching home feed...")
-    for submission in reddit.front.hot(limit=POST_LIMIT_HOME):
-        submissions[submission.id] = submission
+    # 1️⃣ Home feed (hot/new)
+    print("Fetching home feed…")
+    for s in reddit.front.new(limit=POST_LIMIT_HOME):
+        if s.created_utc >= CUTOFF:
+            submissions[s.id] = s
 
     # 2️⃣ Saved posts
-    print("Fetching saved posts...")
-    for submission in user.saved(limit=POST_LIMIT_SAVED):
-        submissions[submission.id] = submission
+    print("Fetching your saved posts…")
+    user = reddit.user.me()
+    for s in user.saved(limit=POST_LIMIT_SAVED):
+        if getattr(s, "created_utc", 0) >= CUTOFF:
+            submissions[s.id] = s
 
-    # 3️⃣ Random subscribed subreddits
-    print("Fetching random subscribed subreddits...")
-    subs = list(user.subreddits(limit=None))
-    random.shuffle(subs)
-    selected_subs = subs[:MAX_RANDOM_SUBS]
+    # 3️⃣ Random subscribed subs
+    print("Fetching subscribed subreddits…")
+    all_subs = list(reddit.user.subreddits(limit=None))
+    random.shuffle(all_subs)
+    selected = all_subs[:MAX_RANDOM_SUBS]
 
-    for subreddit in selected_subs:
-        print("✔", subreddit.display_name)
-        for submission in subreddit.hot(limit=POST_LIMIT_PER_SUB):
-            submissions[submission.id] = submission
+    for sub_obj in selected:
+        print("✔", sub_obj.display_name)
+        for s in sub_obj.new(limit=POST_LIMIT_PER_SUB):
+            if s.created_utc >= CUTOFF:
+                submissions[s.id] = s
 
-    print(f"\nTotal unique posts collected: {len(submissions)}")
+    print(f"\nTotal unique posts in last 24h: {len(submissions)}")
 
-    total_downloaded = 0
-
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = [executor.submit(process_post, s) for s in submissions.values()]
+    total = 0
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+        futures = [pool.submit(process_post, s) for s in submissions.values()]
         for f in tqdm(as_completed(futures), total=len(futures)):
-            total_downloaded += f.result()
+            total += f.result()
 
     print("\n🔥 DONE")
-    print("Downloaded:", total_downloaded)
+    print("Downloaded:", total)
 
 
 if __name__ == "__main__":
