@@ -1,8 +1,6 @@
 name: Reddit Scraper & Hoard Tester
 
 on:
-  schedule:
-    - cron: "30 6 * * *"
   workflow_dispatch:        # Optional: also allow manual runs
 
   
