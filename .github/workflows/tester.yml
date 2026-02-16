@@ -1,9 +1,12 @@
-name: Reddit Scraper & Hoard Tester
+name: Reddit Full Pipeline
 
 on:
   schedule:
     - cron: "30 6 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   run-pipeline:
@@ -30,19 +33,19 @@ jobs:
       - name: Run Telegram Uploader
         env:
           API_ID: ${{ secrets.API_ID }}
-          API_HASH: ${{ secrets.API_HASH}}
+          API_HASH: ${{ secrets.API_HASH }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
         run: python tg.py
 
-      - name: Zip Downloads
-        run: zip -r downloads.zip downloads
+      - name: Create tar archive
+        run: tar -cf downloads.tar downloads
 
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           FILE_LIST=$(ls downloads | sed 's/^/- /')
-          gh release create "dump-$(date +'%Y%m%d-%H%M%S')" downloads.zip \
-            --title "Reddit Media Test Dump" \
+          gh release create "dump-$(date +'%Y%m%d-%H%M%S')" downloads.tar \
+            --title "Reddit Media Dump" \
             --notes "$FILE_LIST"
