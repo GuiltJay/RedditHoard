@@ -12,9 +12,9 @@ from tqdm import tqdm
 
 # ================= CONFIG =================
 
-SUBREDDITS = ["pics", "videos", "memes", "aww"]
-POST_LIMIT_PER_SUB = 50
-MAX_WORKERS = 10
+POST_LIMIT_PER_SUB = 25          # Posts per subreddit
+MAX_SUBREDDITS = 50              # Limit subs (avoid scraping 200+)
+MAX_WORKERS = 10                 # Download threads
 DOWNLOAD_DIR = "downloads"
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -69,8 +69,7 @@ def merge_dash(video_path, audio_path, output_path):
     if os.path.exists(audio_path):
         os.remove(audio_path)
 
-
-# ================= HANDLERS =================
+# ================= MEDIA HANDLERS =================
 
 def handle_reddit_video(submission, sub, created):
     media = submission.media
@@ -98,6 +97,7 @@ def handle_reddit_video(submission, sub, created):
             os.path.join(DOWNLOAD_DIR, final_name)
         )
 
+        existing_files.add(final_name)
         return 1
 
     elif video_url:
@@ -137,9 +137,8 @@ def handle_redgifs(url, sub, submission_id, created):
     if not gif_id:
         return 0
 
-    api = f"https://api.redgifs.com/v2/gifs/{gif_id}"
     try:
-        r = requests.get(api)
+        r = requests.get(f"https://api.redgifs.com/v2/gifs/{gif_id}", timeout=15)
         if r.status_code == 200:
             data = r.json()
             video_url = data.get("gif", {}).get("urls", {}).get("hd")
@@ -163,7 +162,8 @@ def handle_imgur(url, sub, submission_id, created):
         try:
             r = requests.get(
                 f"https://api.imgur.com/3/album/{album_id}/images",
-                headers=headers
+                headers=headers,
+                timeout=15
             )
             if r.status_code == 200:
                 data = r.json()
@@ -180,15 +180,17 @@ def handle_imgur(url, sub, submission_id, created):
     filename = f"{sub}-{submission_id}-{created}.jpg"
     return download_file(direct, filename)
 
-
-# ================= PROCESS =================
+# ================= PROCESS POST =================
 
 def process_post(submission):
     downloaded = 0
 
     # Safe crosspost
-    if submission.crosspost_parent_list:
-        submission = submission.crosspost_parent_list[0]
+    try:
+        if submission.crosspost_parent_list:
+            submission = submission.crosspost_parent_list[0]
+    except:
+        pass
 
     url = submission.url
     sub = submission.subreddit.display_name
@@ -218,18 +220,31 @@ def process_post(submission):
 
     return downloaded
 
-
 # ================= MAIN =================
 
 def main():
-    print("🔥 PRAW Reddit Scraper (Stable Edition)")
+    print("🔥 Reddit Scraper (Subscribed Subreddits Mode)")
+    print("Fetching subscribed subreddits...\n")
 
     submissions = []
+    sub_count = 0
 
-    for sub_name in SUBREDDITS:
-        subreddit = reddit.subreddit(sub_name)
-        for submission in subreddit.hot(limit=POST_LIMIT_PER_SUB):
-            submissions.append(submission)
+    try:
+        for subreddit in reddit.user.subreddits(limit=None):
+            print("✔", subreddit.display_name)
+
+            for submission in subreddit.hot(limit=POST_LIMIT_PER_SUB):
+                submissions.append(submission)
+
+            sub_count += 1
+            if sub_count >= MAX_SUBREDDITS:
+                break
+
+    except Exception as e:
+        print("Error fetching subscriptions:", e)
+        return
+
+    print(f"\nCollected {len(submissions)} posts from {sub_count} subreddits")
 
     total_downloaded = 0
 
@@ -239,6 +254,7 @@ def main():
         for f in tqdm(as_completed(futures), total=len(futures)):
             total_downloaded += f.result()
 
+    print("\n🔥 DONE")
     print("Downloaded:", total_downloaded)
 
 
