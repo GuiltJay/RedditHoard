@@ -27,3 +27,6 @@ jobs:
       - name: Run scraper
         run: |
           python beta.py
+      - name: Run Uploader
+        run: |
+          python tg.py
