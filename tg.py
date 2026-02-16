@@ -2,34 +2,27 @@ import os
 import asyncio
 import hashlib
 import sqlite3
+import subprocess
 from datetime import datetime
 from pyrogram import Client
 from pyrogram.errors import FloodWait, RPCError
 from tqdm import tqdm
 
-# ================= CONFIG =================
-
-
-API_ID = 21347898                        # Your Telegram API ID (integer)
-API_HASH = "98caf2e4f0c25e142c3cbb2e36e683ef"       # Your Telegram API Hash (string)
-BOT_TOKENS = ["8424607885:AAHSWoyIiwTsc3gwhkcNJVTQTgFtGn0ca3w","8338190991:AAENGv0u9fH6bicMxUxOnK1I0qhsSmpB1pk"]     # Get from @BotFather
-CHANNEL_ID = 7589472315 # -1002965517245     
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHANNEL_ID = os.getenv("CHANNEL_ID")
 
 FOLDER_PATH = "downloads"
-
-MAX_PARALLEL_PER_BOT = 4     # 2–4 safe per bot
+MAX_PARALLEL = 3
 MAX_RETRIES = 5
 DB_FILE = "upload_state.db"
 
-# ================= FILE TYPES =================
-
-IMAGE_EXT = {'.jpg', '.jpeg', '.png', '.webp', '.bmp'}
-VIDEO_EXT = {'.mp4', '.mkv', '.mov', '.webm'}
+VIDEO_EXT = {'.mp4', '.mkv', '.webm', '.mov'}
+IMAGE_EXT = {'.jpg', '.jpeg', '.png', '.webp'}
 GIF_EXT = {'.gif'}
-AUDIO_EXT = {'.mp3', '.m4a', '.aac', '.wav'}
-VOICE_EXT = {'.ogg'}
 
-# ================= DATABASE =================
+# ================= DB =================
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -45,205 +38,153 @@ def init_db():
     return conn
 
 
-def calculate_hash(filepath):
-    sha1 = hashlib.sha1()
-    with open(filepath, "rb") as f:
+def file_hash(path):
+    h = hashlib.sha1()
+    with open(path, "rb") as f:
         while chunk := f.read(1024 * 1024):
-            sha1.update(chunk)
-    return sha1.hexdigest()
+            h.update(chunk)
+    return h.hexdigest()
 
 
-def already_uploaded(conn, file_hash):
-    c = conn.cursor()
-    c.execute("SELECT 1 FROM uploaded WHERE hash=?", (file_hash,))
-    return c.fetchone() is not None
-
-
-def mark_uploaded(conn, file_hash, filename):
+def mark_uploaded(conn, hash_value, filename):
     c = conn.cursor()
     c.execute(
         "INSERT OR IGNORE INTO uploaded VALUES (?, ?, ?)",
-        (file_hash, filename, datetime.utcnow().isoformat())
+        (hash_value, filename, datetime.utcnow().isoformat())
     )
     conn.commit()
 
+
+def already_uploaded(conn, hash_value):
+    c = conn.cursor()
+    c.execute("SELECT 1 FROM uploaded WHERE hash=?", (hash_value,))
+    return c.fetchone() is not None
+
+
+# ================= VIDEO PROCESSING =================
+
+def convert_to_streamable(path):
+    if path.endswith(".mp4"):
+        return path
+
+    output = path + "_stream.mp4"
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", path,
+        "-c:v", "libx264",
+        "-preset", "fast",
+        "-movflags", "+faststart",
+        "-c:a", "aac",
+        output
+    ]
+
+    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return output if os.path.exists(output) else path
+
+
+def generate_thumbnail(video_path):
+    thumb = video_path + ".jpg"
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-ss", "00:00:01",
+        "-i", video_path,
+        "-vframes", "1",
+        thumb
+    ]
+
+    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return thumb if os.path.exists(thumb) else None
+
+
 # ================= UPLOADER =================
 
-async def multi_bot_media_uploader():
+async def run_uploader():
 
     conn = init_db()
+    semaphore = asyncio.Semaphore(MAX_PARALLEL)
 
-    files = []
-    for filename in os.listdir(FOLDER_PATH):
-        path = os.path.join(FOLDER_PATH, filename)
-        if os.path.isfile(path):
-            files.append((path, filename))
-
-    if not files:
-        print("No files found.")
-        return
-
-    total_files = len(files)
-    queue = asyncio.Queue()
-
-    for file in files:
-        await queue.put(file)
+    files = [
+        (os.path.join(FOLDER_PATH, f), f)
+        for f in os.listdir(FOLDER_PATH)
+        if os.path.isfile(os.path.join(FOLDER_PATH, f))
+    ]
 
     sent = 0
     skipped = 0
     failed = 0
 
-    counter_lock = asyncio.Lock()
+    app = Client("single_bot", API_ID, API_HASH, bot_token=BOT_TOKEN)
 
-    async def send_media(app, file_path, filename):
-
-        ext = os.path.splitext(filename)[1].lower()
-
-        if ext in IMAGE_EXT:
-            await app.send_photo(
-                CHANNEL_ID,
-                file_path,
-                caption=filename
-            )
-
-        elif ext in VIDEO_EXT:
-            await app.send_video(
-                CHANNEL_ID,
-                file_path,
-                caption=filename,
-                supports_streaming=True
-            )
-
-        elif ext in GIF_EXT:
-            await app.send_animation(
-                CHANNEL_ID,
-                file_path,
-                caption=filename
-            )
-
-        elif ext in AUDIO_EXT:
-            await app.send_audio(
-                CHANNEL_ID,
-                file_path,
-                caption=filename
-            )
-
-        elif ext in VOICE_EXT:
-            await app.send_voice(
-                CHANNEL_ID,
-                file_path,
-                caption=filename
-            )
-
-        else:
-            await app.send_document(
-                CHANNEL_ID,
-                file_path,
-                caption=filename
-            )
-
-    async def bot_worker(bot_token, bot_index):
-
+    async def upload_one(path, filename):
         nonlocal sent, skipped, failed
 
-        app = Client(
-            name=f"media_bot_{bot_index}",
-            api_id=API_ID,
-            api_hash=API_HASH,
-            bot_token=bot_token
-        )
+        hash_val = file_hash(path)
 
-        semaphore = asyncio.Semaphore(MAX_PARALLEL_PER_BOT)
+        if already_uploaded(conn, hash_val):
+            skipped += 1
+            return
 
-        async with app:
+        retries = 0
 
-            while True:
-                try:
-                    file_path, filename = await queue.get()
-                except:
-                    break
+        while retries <= MAX_RETRIES:
+            try:
+                async with semaphore:
 
-                file_hash = calculate_hash(file_path)
+                    ext = os.path.splitext(filename)[1].lower()
 
-                if already_uploaded(conn, file_hash):
-                    async with counter_lock:
-                        skipped += 1
-                    queue.task_done()
-                    continue
+                    if ext in VIDEO_EXT:
+                        path = convert_to_streamable(path)
+                        thumb = generate_thumbnail(path)
 
-                retries = 0
-                success = False
+                        await app.send_video(
+                            CHANNEL_ID,
+                            path,
+                            caption=filename,
+                            supports_streaming=True,
+                            thumb=thumb
+                        )
 
-                while retries <= MAX_RETRIES:
-                    try:
-                        async with semaphore:
-                            await send_media(app, file_path, filename)
+                    elif ext in IMAGE_EXT:
+                        await app.send_photo(CHANNEL_ID, path, caption=filename)
 
-                        mark_uploaded(conn, file_hash, filename)
+                    elif ext in GIF_EXT:
+                        await app.send_animation(CHANNEL_ID, path, caption=filename)
 
-                        async with counter_lock:
-                            sent += 1
+                    else:
+                        await app.send_document(CHANNEL_ID, path, caption=filename)
 
-                        success = True
-                        break
+                mark_uploaded(conn, hash_val, filename)
+                sent += 1
+                return
 
-                    except FloodWait as e:
-                        retries += 1
-                        await asyncio.sleep(e.value + 1)
+            except FloodWait as e:
+                retries += 1
+                await asyncio.sleep(e.value + 1)
 
-                    except RPCError:
-                        async with counter_lock:
-                            failed += 1
-                        break
+            except RPCError:
+                failed += 1
+                return
 
-                    except Exception:
-                        async with counter_lock:
-                            failed += 1
-                        break
+            except Exception:
+                failed += 1
+                return
 
-                if not success:
-                    async with counter_lock:
-                        failed += 1
+    async with app:
+        tasks = [upload_one(p, f) for p, f in files]
 
-                queue.task_done()
+        with tqdm(total=len(tasks), desc="Uploading") as pbar:
+            for coro in asyncio.as_completed(tasks):
+                await coro
+                pbar.update(1)
 
-    workers = [
-        asyncio.create_task(bot_worker(token, idx))
-        for idx, token in enumerate(BOT_TOKENS)
-    ]
-
-    with tqdm(total=total_files, desc="🎬 Multi-Bot Media Upload", unit="file") as pbar:
-
-        last_count = 0
-
-        while any(not w.done() for w in workers):
-            await asyncio.sleep(0.5)
-
-            current = sent + skipped + failed
-            delta = current - last_count
-
-            if delta > 0:
-                pbar.update(delta)
-                last_count = current
-
-            pbar.set_postfix({
-                "Sent": sent,
-                "Skipped": skipped,
-                "Failed": failed
-            })
-
-        final_count = sent + skipped + failed
-        pbar.update(final_count - last_count)
-
-    await asyncio.gather(*workers)
-
-    conn.close()
-
-    print("\n🔥 MEDIA UPLOAD COMPLETE")
     print("Sent:", sent)
     print("Skipped:", skipped)
     print("Failed:", failed)
 
+    conn.close()
+
 
 if __name__ == "__main__":
-    asyncio.run(multi_bot_media_uploader())
+    asyncio.run(run_uploader())
