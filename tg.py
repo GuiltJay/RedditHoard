@@ -167,7 +167,7 @@ if __name__ == "__main__":
     API_ID = 21347898                        # Your Telegram API ID (integer)
     API_HASH = "98caf2e4f0c25e142c3cbb2e36e683ef"       # Your Telegram API Hash (string)
     BOT_TOKEN = "8424607885:AAHSWoyIiwTsc3gwhkcNJVTQTgFtGn0ca3w"     # Get from @BotFather
-    CHANNEL_ID = -1002965517245         # or numeric ID like -1001234567890
+    CHANNEL_ID = 7589472315 # -1002965517245         # or numeric ID like -1001234567890
     
     asyncio.run(
         ultra_upload(
