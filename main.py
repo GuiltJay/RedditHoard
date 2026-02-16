@@ -1,4 +1,5 @@
 import os
+import random
 import time
 import requests
 import subprocess
@@ -12,14 +13,17 @@ from tqdm import tqdm
 
 # ================= CONFIG =================
 
-POST_LIMIT_PER_SUB = 25          # Posts per subreddit
-MAX_SUBREDDITS = 50              # Limit subs (avoid scraping 200+)
-MAX_WORKERS = 10                 # Download threads
+POST_LIMIT_HOME = 200
+POST_LIMIT_SAVED = 50
+POST_LIMIT_PER_SUB = 25
+MAX_RANDOM_SUBS = 50
+MAX_WORKERS = 10
 DOWNLOAD_DIR = "downloads"
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+existing_files = set(os.listdir(DOWNLOAD_DIR))
 
-# ================= ENV =================
+# ================= LOAD ENV =================
 
 load_dotenv()
 
@@ -32,8 +36,6 @@ reddit = praw.Reddit(
 )
 
 IMGUR_CLIENT_ID = os.getenv("IMGUR_CLIENT_ID")
-
-existing_files = set(os.listdir(DOWNLOAD_DIR))
 
 # ================= HELPERS =================
 
@@ -112,7 +114,6 @@ def handle_gallery(submission, sub):
         return 0
 
     downloaded = 0
-
     for item in submission.gallery_data["items"]:
         media_id = item["media_id"]
         meta = submission.media_metadata.get(media_id)
@@ -133,9 +134,6 @@ def handle_redgifs(url, sub, submission_id, created):
     gif_id = parts[-1]
     if gif_id.lower() == "watch" and len(parts) > 1:
         gif_id = parts[-2]
-
-    if not gif_id:
-        return 0
 
     try:
         r = requests.get(f"https://api.redgifs.com/v2/gifs/{gif_id}", timeout=15)
@@ -180,12 +178,11 @@ def handle_imgur(url, sub, submission_id, created):
     filename = f"{sub}-{submission_id}-{created}.jpg"
     return download_file(direct, filename)
 
-# ================= PROCESS POST =================
+# ================= PROCESS =================
 
 def process_post(submission):
     downloaded = 0
 
-    # Safe crosspost
     try:
         if submission.crosspost_parent_list:
             submission = submission.crosspost_parent_list[0]
@@ -223,34 +220,38 @@ def process_post(submission):
 # ================= MAIN =================
 
 def main():
-    print("🔥 Reddit Scraper (Subscribed Subreddits Mode)")
-    print("Fetching subscribed subreddits...\n")
+    print("🔥 Hybrid Reddit Hoarder Engine")
 
-    submissions = []
-    sub_count = 0
+    submissions = {}
+    user = reddit.user.me()
 
-    try:
-        for subreddit in reddit.user.subreddits(limit=None):
-            print("✔", subreddit.display_name)
+    # 1️⃣ Home feed
+    print("Fetching home feed...")
+    for submission in reddit.front.hot(limit=POST_LIMIT_HOME):
+        submissions[submission.id] = submission
 
-            for submission in subreddit.hot(limit=POST_LIMIT_PER_SUB):
-                submissions.append(submission)
+    # 2️⃣ Saved posts
+    print("Fetching saved posts...")
+    for submission in user.saved(limit=POST_LIMIT_SAVED):
+        submissions[submission.id] = submission
 
-            sub_count += 1
-            if sub_count >= MAX_SUBREDDITS:
-                break
+    # 3️⃣ Random subscribed subreddits
+    print("Fetching random subscribed subreddits...")
+    subs = list(user.subreddits(limit=None))
+    random.shuffle(subs)
+    selected_subs = subs[:MAX_RANDOM_SUBS]
 
-    except Exception as e:
-        print("Error fetching subscriptions:", e)
-        return
+    for subreddit in selected_subs:
+        print("✔", subreddit.display_name)
+        for submission in subreddit.hot(limit=POST_LIMIT_PER_SUB):
+            submissions[submission.id] = submission
 
-    print(f"\nCollected {len(submissions)} posts from {sub_count} subreddits")
+    print(f"\nTotal unique posts collected: {len(submissions)}")
 
     total_downloaded = 0
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = [executor.submit(process_post, s) for s in submissions]
-
+        futures = [executor.submit(process_post, s) for s in submissions.values()]
         for f in tqdm(as_completed(futures), total=len(futures)):
             total_downloaded += f.result()
 
