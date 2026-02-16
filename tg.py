@@ -9,17 +9,25 @@ from tqdm import tqdm
 
 # ================= CONFIG =================
 
-MAX_PARALLEL_UPLOADS = 4      # 3–5 safe for most bots
+
+API_ID = 21347898                        # Your Telegram API ID (integer)
+API_HASH = "98caf2e4f0c25e142c3cbb2e36e683ef"       # Your Telegram API Hash (string)
+BOT_TOKENS = ["8424607885:AAHSWoyIiwTsc3gwhkcNJVTQTgFtGn0ca3w","8338190991:AAENGv0u9fH6bicMxUxOnK1I0qhsSmpB1pk"]     # Get from @BotFather
+CHANNEL_ID = 7589472315 # -1002965517245     
+
+FOLDER_PATH = "downloads"
+
+MAX_PARALLEL_PER_BOT = 4     # 2–4 safe per bot
 MAX_RETRIES = 5
-UPLOAD_AS_DOCUMENT = True     # MUCH faster for videos
 DB_FILE = "upload_state.db"
 
-# ================= FILE TYPE MAP =================
+# ================= FILE TYPES =================
 
-IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.bmp', '.webp', '.tiff'}
-VIDEO_EXTENSIONS = {'.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm'}
-AUDIO_EXTENSIONS = {'.mp3', '.wav', '.ogg', '.flac', '.m4a'}
-GIF_EXTENSIONS = {'.gif'}
+IMAGE_EXT = {'.jpg', '.jpeg', '.png', '.webp', '.bmp'}
+VIDEO_EXT = {'.mp4', '.mkv', '.mov', '.webm'}
+GIF_EXT = {'.gif'}
+AUDIO_EXT = {'.mp3', '.m4a', '.aac', '.wav'}
+VOICE_EXT = {'.ogg'}
 
 # ================= DATABASE =================
 
@@ -37,144 +45,205 @@ def init_db():
     return conn
 
 
-def file_hash(filepath):
-    h = hashlib.sha1()
+def calculate_hash(filepath):
+    sha1 = hashlib.sha1()
     with open(filepath, "rb") as f:
         while chunk := f.read(1024 * 1024):
-            h.update(chunk)
-    return h.hexdigest()
+            sha1.update(chunk)
+    return sha1.hexdigest()
 
 
-def already_uploaded(conn, hash_value):
+def already_uploaded(conn, file_hash):
     c = conn.cursor()
-    c.execute("SELECT 1 FROM uploaded WHERE hash=?", (hash_value,))
+    c.execute("SELECT 1 FROM uploaded WHERE hash=?", (file_hash,))
     return c.fetchone() is not None
 
 
-def mark_uploaded(conn, hash_value, filename):
+def mark_uploaded(conn, file_hash, filename):
     c = conn.cursor()
     c.execute(
         "INSERT OR IGNORE INTO uploaded VALUES (?, ?, ?)",
-        (hash_value, filename, datetime.utcnow().isoformat())
+        (file_hash, filename, datetime.utcnow().isoformat())
     )
     conn.commit()
 
+# ================= UPLOADER =================
 
-# ================= ULTRA UPLOADER =================
-
-async def ultra_upload(folder_path, api_id, api_hash, bot_token, channel_id):
+async def multi_bot_media_uploader():
 
     conn = init_db()
 
-    app = Client("ultra_uploader", api_id, api_hash, bot_token=bot_token)
-
     files = []
-    for filename in os.listdir(folder_path):
-        path = os.path.join(folder_path, filename)
+    for filename in os.listdir(FOLDER_PATH):
+        path = os.path.join(FOLDER_PATH, filename)
         if os.path.isfile(path):
-            if os.path.getsize(path) <= 2000 * 1024 * 1024:
-                files.append((path, filename))
+            files.append((path, filename))
 
     if not files:
-        print("No files to upload.")
+        print("No files found.")
         return
 
-    semaphore = asyncio.Semaphore(MAX_PARALLEL_UPLOADS)
+    total_files = len(files)
+    queue = asyncio.Queue()
+
+    for file in files:
+        await queue.put(file)
 
     sent = 0
     skipped = 0
     failed = 0
 
-    async def upload_single(path, filename):
+    counter_lock = asyncio.Lock()
+
+    async def send_media(app, file_path, filename):
+
+        ext = os.path.splitext(filename)[1].lower()
+
+        if ext in IMAGE_EXT:
+            await app.send_photo(
+                CHANNEL_ID,
+                file_path,
+                caption=filename
+            )
+
+        elif ext in VIDEO_EXT:
+            await app.send_video(
+                CHANNEL_ID,
+                file_path,
+                caption=filename,
+                supports_streaming=True
+            )
+
+        elif ext in GIF_EXT:
+            await app.send_animation(
+                CHANNEL_ID,
+                file_path,
+                caption=filename
+            )
+
+        elif ext in AUDIO_EXT:
+            await app.send_audio(
+                CHANNEL_ID,
+                file_path,
+                caption=filename
+            )
+
+        elif ext in VOICE_EXT:
+            await app.send_voice(
+                CHANNEL_ID,
+                file_path,
+                caption=filename
+            )
+
+        else:
+            await app.send_document(
+                CHANNEL_ID,
+                file_path,
+                caption=filename
+            )
+
+    async def bot_worker(bot_token, bot_index):
+
         nonlocal sent, skipped, failed
 
-        file_sha = file_hash(path)
+        app = Client(
+            name=f"media_bot_{bot_index}",
+            api_id=API_ID,
+            api_hash=API_HASH,
+            bot_token=bot_token
+        )
 
-        if already_uploaded(conn, file_sha):
-            skipped += 1
-            return
+        semaphore = asyncio.Semaphore(MAX_PARALLEL_PER_BOT)
 
-        retries = 0
+        async with app:
 
-        while retries <= MAX_RETRIES:
-            try:
-                async with semaphore:
+            while True:
+                try:
+                    file_path, filename = await queue.get()
+                except:
+                    break
 
-                    if UPLOAD_AS_DOCUMENT:
-                        await app.send_document(
-                            chat_id=channel_id,
-                            document=path,
-                            caption=filename
-                        )
-                    else:
-                        ext = os.path.splitext(filename)[1].lower()
+                file_hash = calculate_hash(file_path)
 
-                        if ext in IMAGE_EXTENSIONS:
-                            await app.send_photo(channel_id, path, caption=filename)
-                        elif ext in VIDEO_EXTENSIONS:
-                            await app.send_video(channel_id, path, caption=filename)
-                        elif ext in AUDIO_EXTENSIONS:
-                            await app.send_audio(channel_id, path, caption=filename)
-                        elif ext in GIF_EXTENSIONS:
-                            await app.send_animation(channel_id, path, caption=filename)
-                        else:
-                            await app.send_document(channel_id, path, caption=filename)
+                if already_uploaded(conn, file_hash):
+                    async with counter_lock:
+                        skipped += 1
+                    queue.task_done()
+                    continue
 
-                mark_uploaded(conn, file_sha, filename)
-                sent += 1
-                return
+                retries = 0
+                success = False
 
-            except FloodWait as e:
-                retries += 1
-                await asyncio.sleep(e.value + 1)
+                while retries <= MAX_RETRIES:
+                    try:
+                        async with semaphore:
+                            await send_media(app, file_path, filename)
 
-            except RPCError:
-                failed += 1
-                return
+                        mark_uploaded(conn, file_hash, filename)
 
-            except Exception:
-                failed += 1
-                return
+                        async with counter_lock:
+                            sent += 1
 
-        failed += 1
+                        success = True
+                        break
 
-    async with app:
+                    except FloodWait as e:
+                        retries += 1
+                        await asyncio.sleep(e.value + 1)
 
-        tasks = [upload_single(path, filename) for path, filename in files]
+                    except RPCError:
+                        async with counter_lock:
+                            failed += 1
+                        break
 
-        with tqdm(total=len(tasks), desc="🚀 Uploading", unit="file") as pbar:
-            for coro in asyncio.as_completed(tasks):
-                await coro
-                pbar.update(1)
-                pbar.set_postfix({
-                    "Sent": sent,
-                    "Skipped": skipped,
-                    "Failed": failed
-                })
+                    except Exception:
+                        async with counter_lock:
+                            failed += 1
+                        break
+
+                if not success:
+                    async with counter_lock:
+                        failed += 1
+
+                queue.task_done()
+
+    workers = [
+        asyncio.create_task(bot_worker(token, idx))
+        for idx, token in enumerate(BOT_TOKENS)
+    ]
+
+    with tqdm(total=total_files, desc="🎬 Multi-Bot Media Upload", unit="file") as pbar:
+
+        last_count = 0
+
+        while any(not w.done() for w in workers):
+            await asyncio.sleep(0.5)
+
+            current = sent + skipped + failed
+            delta = current - last_count
+
+            if delta > 0:
+                pbar.update(delta)
+                last_count = current
+
+            pbar.set_postfix({
+                "Sent": sent,
+                "Skipped": skipped,
+                "Failed": failed
+            })
+
+        final_count = sent + skipped + failed
+        pbar.update(final_count - last_count)
+
+    await asyncio.gather(*workers)
 
     conn.close()
 
-    print("\n🔥 ULTRA UPLOAD COMPLETE")
+    print("\n🔥 MEDIA UPLOAD COMPLETE")
     print("Sent:", sent)
-    print("Skipped (already uploaded):", skipped)
+    print("Skipped:", skipped)
     print("Failed:", failed)
 
 
-# ================= RUN =================
-
 if __name__ == "__main__":
-
-    API_ID = 21347898                        # Your Telegram API ID (integer)
-    API_HASH = "98caf2e4f0c25e142c3cbb2e36e683ef"       # Your Telegram API Hash (string)
-    BOT_TOKEN = "8424607885:AAHSWoyIiwTsc3gwhkcNJVTQTgFtGn0ca3w"     # Get from @BotFather
-    CHANNEL_ID = 7589472315 # -1002965517245         # or numeric ID like -1001234567890
-    
-    asyncio.run(
-        ultra_upload(
-            folder_path="downloads",
-            api_id=API_ID,
-            api_hash=API_HASH,
-            bot_token=BOT_TOKEN,
-            channel_id=CHANNEL_ID
-        )
-    )
+    asyncio.run(multi_bot_media_uploader())
