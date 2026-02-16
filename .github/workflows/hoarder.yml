@@ -49,3 +49,10 @@ jobs:
           gh release create "dump-$(date +'%Y%m%d-%H%M%S')" downloads.tar \
             --title "Reddit Media Dump" \
             --notes "$FILE_LIST"
+      - name: Commit DB
+        run: |
+           git config user.name "github-actions"
+           git config user.email "actions@github.com"
+           git add reddit_stats.db
+           git commit -m "Update analytics DB" || echo "No changes"
+           git push
