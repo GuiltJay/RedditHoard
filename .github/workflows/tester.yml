@@ -1,4 +1,4 @@
-name: Reddit Full Pipeline
+name: Reddit Full Pipeline Tester
 
 on:
   schedule:
