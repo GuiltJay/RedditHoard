@@ -36,7 +36,7 @@ jobs:
           API_HASH: ${{ secrets.API_HASH }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
-        run: python tg_single_uploader.py
+        run: python tg.py
 
       - name: Create tar archive
         run: tar -cf downloads.tar downloads
