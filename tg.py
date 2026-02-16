@@ -193,7 +193,7 @@ if __name__ == "__main__":
     FOLDER_PATH = "./downloads"  # e.g., "./my_files"
     API_ID = 21347898                        # Your Telegram API ID (integer)
     API_HASH = "98caf2e4f0c25e142c3cbb2e36e683ef"       # Your Telegram API Hash (string)
-    BOT_TOKEN = "7944713082:AAFMtxhwah97c6twmGLcWWuTC2wkPerY3tg"     # Get from @BotFather
+    BOT_TOKEN = "8424607885:AAHSWoyIiwTsc3gwhkcNJVTQTgFtGn0ca3w"     # Get from @BotFather
     CHANNEL_ID = -1002965517245         # or numeric ID like -1001234567890
     DELAY_BETWEEN_SENDS = 0.5             # Seconds between sends (adjust as needed, e.g., 2.0 for slower)
     MAX_RETRIES = 3                       # Max retry attempts per file
