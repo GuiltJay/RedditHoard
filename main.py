@@ -83,7 +83,6 @@ def merge_dash(video_path, audio_path, output_path):
         output_path
     ]
     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
     for p in (video_path, audio_path):
         if os.path.exists(p):
             os.remove(p)
@@ -92,7 +91,7 @@ def merge_dash(video_path, audio_path, output_path):
 # ================= MEDIA HANDLERS =================
 
 def handle_reddit_video(submission, sub, created):
-    media = submission.media
+    media = getattr(submission, "media", None)
     if not media or "reddit_video" not in media:
         return 0
 
@@ -123,13 +122,13 @@ def handle_reddit_video(submission, sub, created):
 
 
 def handle_gallery(submission, sub):
-    if not submission.gallery_data:
+    if not hasattr(submission, "gallery_data") or not submission.gallery_data:
         return 0
 
     total = 0
     for item in submission.gallery_data["items"]:
         media_id = item["media_id"]
-        meta = submission.media_metadata.get(media_id)
+        meta = submission.media_metadata.get(media_id) if hasattr(submission, "media_metadata") else None
         if meta and meta.get("status") == "valid":
             url = meta["s"]["u"].replace("&amp;", "&")
             filename = f"{sub}-{submission.id}-{media_id}.jpg"
@@ -155,7 +154,7 @@ def handle_redgifs(url, sub, sid, created):
                 filename = f"{sub}-{sid}-{created}.mp4"
                 return download_file(v, filename)
     except Exception as e:
-        print(f"[ERROR] RedGifs parsing failed for {url}: {e}")
+        print(f"[ERROR] RedGifs failed for {url}: {e}")
 
     return 0
 
@@ -193,31 +192,29 @@ def process_post(submission):
         return 0
 
     try:
-        cp = submission.crosspost_parent_list
+        cp = getattr(submission, "crosspost_parent_list", None)
         if cp and isinstance(cp, list):
             parent_id = cp[0].get("id")
             if parent_id:
-                print(f"[CROSSPOST] Resolving parent {parent_id}")
+                print(f"[CROSSPOST] Fetching parent {parent_id}")
                 submission = reddit.submission(id=parent_id)
-    except:
-        pass
+    except Exception as e:
+        print(f"[WARN] crosspost fetch failed: {e}")
 
     d = 0
 
     url = submission.url
     sub = submission.subreddit.display_name
-
     created = datetime.fromtimestamp(
         submission.created_utc, tz=timezone.utc
     ).strftime("%Y%m%d_%H%M%S")
-
     dom = urlparse(url).netloc.lower()
 
     try:
-        if submission.gallery_data:
+        if hasattr(submission, "gallery_data") and submission.gallery_data:
             print(f"[GALLERY] {submission.id}")
             d += handle_gallery(submission, sub)
-        elif submission.media:
+        elif hasattr(submission, "media") and submission.media:
             print(f"[REDDIT VIDEO] {submission.id}")
             d += handle_reddit_video(submission, sub, created)
         elif "redgifs.com" in dom:
@@ -242,11 +239,10 @@ def process_post(submission):
 # ================= MAIN =================
 
 def main():
-    print("🔥 Reddit Hybrid Hoarder Engine (24h Only)")
-    submissions = {}
-    count_before = len(submissions)
+    print("🔥 Reddit Hybrid Hoarder (24h filtered)")
 
-    # 🏠 Home feed
+    submissions = {}
+
     if FETCH_HOME:
         print("➡️ Fetching home feed…")
         home_added = 0
@@ -254,9 +250,8 @@ def main():
             if s.created_utc >= CUTOFF:
                 submissions[s.id] = s
                 home_added += 1
-        print(f"[DONE] Home feed added: {home_added}")
+        print(f"[DONE] Home posts added: {home_added}")
 
-    # 🗂 Saved posts
     if FETCH_SAVED:
         print("➡️ Fetching saved posts…")
         saved_added = 0
@@ -267,7 +262,6 @@ def main():
                 saved_added += 1
         print(f"[DONE] Saved posts added: {saved_added}")
 
-    # 🌐 Subscribed random subs
     if FETCH_SUBS:
         print("➡️ Fetching subscribed subreddits…")
         try:
@@ -282,11 +276,11 @@ def main():
                     if s.created_utc >= CUTOFF:
                         submissions[s.id] = s
                         sub_added += 1
-            print(f"[DONE] Subscribed subs added: {sub_added}")
+            print(f"[DONE] Subreddit posts added: {sub_added}")
         except Exception as e:
-            print(f"[WARN] Failed to fetch subscribed subs: {e}")
+            print(f"[WARN] Could not fetch subscribed subs: {e}")
 
-    print(f"\n📊 Total unique posts collected: {len(submissions)}")
+    print(f"\n📊 Unique posts collected: {len(submissions)}")
     total_downloaded = 0
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
