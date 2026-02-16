@@ -3,7 +3,7 @@ import random
 import time
 import requests
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -13,8 +13,8 @@ from tqdm import tqdm
 
 # ================= CONFIG =================
 
-POST_LIMIT_HOME = 300
-POST_LIMIT_SAVED = 300
+POST_LIMIT_HOME = 200
+POST_LIMIT_SAVED = 100
 POST_LIMIT_PER_SUB = 35
 MAX_RANDOM_SUBS = 50
 MAX_WORKERS = 12
@@ -23,7 +23,7 @@ DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 existing_files = set(os.listdir(DOWNLOAD_DIR))
 
-# 24-hour cutoff (UTC)
+# Only posts newer than 24 hours
 CUTOFF = time.time() - 24 * 3600
 
 # ================= LOAD ENV =================
@@ -56,8 +56,8 @@ def download_file(url, filename):
             return 1
     except:
         pass
-    return 0
 
+    return 0
 
 def merge_dash(video_path, audio_path, output_path):
     cmd = [
@@ -101,12 +101,13 @@ def handle_reddit_video(submission, sub, created):
     elif video_url:
         filename = f"{sub}-{submission.id}-{created}.mp4"
         return download_file(video_url, filename)
+    
     return 0
-
 
 def handle_gallery(submission, sub):
     if not submission.gallery_data:
         return 0
+
     total = 0
     for item in submission.gallery_data["items"]:
         media_id = item["media_id"]
@@ -117,14 +118,15 @@ def handle_gallery(submission, sub):
             total += download_file(url, filename)
     return total
 
-
 def handle_redgifs(url, sub, sid, created):
     parts = urlparse(url).path.strip("/").split("/")
     if not parts:
         return 0
+
     gif_id = parts[-1]
     if gif_id.lower() == "watch" and len(parts) > 1:
         gif_id = parts[-2]
+
     try:
         r = requests.get(f"https://api.redgifs.com/v2/gifs/{gif_id}", timeout=12)
         if r.status_code == 200:
@@ -135,12 +137,13 @@ def handle_redgifs(url, sub, sid, created):
                 return download_file(v, filename)
     except:
         pass
-    return 0
 
+    return 0
 
 def handle_imgur(url, sub, sid, created):
     parsed = urlparse(url)
     path = parsed.path.strip("/")
+
     if "/a/" in url or "/gallery/" in url:
         album_id = path.split("/")[-1]
         headers = {"Authorization": f"Client-ID {IMGUR_CLIENT_ID}"}
@@ -156,6 +159,7 @@ def handle_imgur(url, sub, sid, created):
                 return total
         except:
             pass
+
     direct = f"https://i.imgur.com/{path}.jpg"
     fname = f"{sub}-{sid}-{created}.jpg"
     return download_file(direct, fname)
@@ -163,7 +167,7 @@ def handle_imgur(url, sub, sid, created):
 # ================= PROCESS =================
 
 def process_post(submission):
-    # Skip if older than 24h
+    # Skip older than 24h
     if submission.created_utc < CUTOFF:
         return 0
 
@@ -176,7 +180,12 @@ def process_post(submission):
 
     url = submission.url
     sub = submission.subreddit.display_name
-    created = datetime.utcfromtimestamp(submission.created_utc).strftime("%Y%m%d_%H%M%S")
+
+    # Uses timezone-aware UTC datetime per Python 3.12 docs
+    created = datetime.fromtimestamp(
+        submission.created_utc, tz=timezone.utc
+    ).strftime("%Y%m%d_%H%M%S")
+
     dom = urlparse(url).netloc.lower()
 
     try:
@@ -204,26 +213,26 @@ def main():
 
     submissions = {}
 
-    # 1️⃣ Home feed (hot/new)
+    # 1️⃣ Home feed
     print("Fetching home feed…")
     for s in reddit.front.new(limit=POST_LIMIT_HOME):
         if s.created_utc >= CUTOFF:
             submissions[s.id] = s
 
-    # 2️⃣ Saved posts
-    print("Fetching your saved posts…")
+    # 2️⃣ Saved posts for user
+    print("Fetching saved posts…")
     user = reddit.user.me()
     for s in user.saved(limit=POST_LIMIT_SAVED):
         if getattr(s, "created_utc", 0) >= CUTOFF:
             submissions[s.id] = s
 
-    # 3️⃣ Random subscribed subs
+    # 3️⃣ Random subscribed subreddits
     print("Fetching subscribed subreddits…")
     all_subs = list(reddit.user.subreddits(limit=None))
     random.shuffle(all_subs)
-    selected = all_subs[:MAX_RANDOM_SUBS]
+    chosen = all_subs[:MAX_RANDOM_SUBS]
 
-    for sub_obj in selected:
+    for sub_obj in chosen:
         print("✔", sub_obj.display_name)
         for s in sub_obj.new(limit=POST_LIMIT_PER_SUB):
             if s.created_utc >= CUTOFF:
@@ -237,9 +246,8 @@ def main():
         for f in tqdm(as_completed(futures), total=len(futures)):
             total += f.result()
 
-    print("\n🔥 DONE")
+    print("\n🔥 FINISHED")
     print("Downloaded:", total)
-
 
 if __name__ == "__main__":
     main()
