@@ -251,6 +251,9 @@ async def run_uploader():
 
     app = Client("single_bot", API_ID, API_HASH, bot_token=BOT_TOKEN)
 
+    # Mutable container so nested function can read the resolved ID
+    target = {"chat_id": CHANNEL_ID}
+
     async def safe_db_check(hash_val):
         async with db_lock:
             return _already_uploaded(conn, hash_val)
@@ -262,6 +265,7 @@ async def run_uploader():
     async def upload_one(path, filename):
         nonlocal sent, skipped, failed
 
+        chat_id = target["chat_id"]
         temp_video = None
         thumb_path = None
 
@@ -303,7 +307,7 @@ async def run_uploader():
                             )
 
                             await app.send_video(
-                                chat_id=CHANNEL_ID,
+                                chat_id=chat_id,
                                 video=converted,
                                 caption=filename,
                                 supports_streaming=True,
@@ -315,21 +319,21 @@ async def run_uploader():
 
                         elif ext in IMAGE_EXT:
                             await app.send_photo(
-                                chat_id=CHANNEL_ID,
+                                chat_id=chat_id,
                                 photo=path,
                                 caption=filename
                             )
 
                         elif ext in GIF_EXT:
                             await app.send_animation(
-                                chat_id=CHANNEL_ID,
+                                chat_id=chat_id,
                                 animation=path,
                                 caption=filename
                             )
 
                         else:
                             await app.send_document(
-                                chat_id=CHANNEL_ID,
+                                chat_id=chat_id,
                                 document=path,
                                 caption=filename,
                                 force_document=True
@@ -390,15 +394,11 @@ async def run_uploader():
         try:
             chat = await app.get_chat(CHANNEL_ID)
             logger.info(f"Connected to channel: {chat.title} (ID: {chat.id})")
-            resolved_id = chat.id
+            target["chat_id"] = chat.id
         except Exception as e:
             logger.error(f"Cannot access channel {CHANNEL_ID}: {e}")
             conn.close()
             return
-
-        # Use resolved numeric ID globally
-        global CHANNEL_ID
-        CHANNEL_ID = resolved_id
 
         tasks = [upload_one(p, f) for p, f in files]
 
