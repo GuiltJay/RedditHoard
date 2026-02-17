@@ -5,7 +5,7 @@ import hashlib
 import sqlite3
 import logging
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from pyrogram import Client
 from pyrogram.errors import FloodWait, RPCError
 from tqdm import tqdm
@@ -43,7 +43,8 @@ except ValueError:
         CHANNEL_ID = f"@{_channel_raw}"
 
 FOLDER_PATH = "downloads"
-MAX_PARALLEL = 3
+MAX_PARALLEL = 1          # Send one at a time to avoid floods
+DELAY_BETWEEN = 3.0       # Seconds between each upload
 MAX_RETRIES = 5
 DB_FILE = "upload_state.db"
 
@@ -86,7 +87,7 @@ def _mark_uploaded(conn, hash_value, filename):
         c = conn.cursor()
         c.execute(
             "INSERT OR IGNORE INTO uploaded VALUES (?, ?, ?)",
-            (hash_value, filename, datetime.utcnow().isoformat())
+            (hash_value, filename, datetime.now(timezone.utc).isoformat())
         )
         conn.commit()
     except sqlite3.Error as e:
@@ -233,7 +234,6 @@ async def run_uploader():
 
     conn = init_db()
     db_lock = asyncio.Lock()
-    semaphore = asyncio.Semaphore(MAX_PARALLEL)
 
     files = collect_files(FOLDER_PATH)
 
@@ -244,153 +244,195 @@ async def run_uploader():
 
     logger.info(f"Found {len(files)} files to process")
 
+    # Pre-filter already uploaded files to avoid unnecessary work
+    to_upload = []
+    pre_skipped = 0
+
+    for path, filename in files:
+        hash_val = file_hash(path)
+        if hash_val is None:
+            continue
+        if _already_uploaded(conn, hash_val):
+            pre_skipped += 1
+        else:
+            to_upload.append((path, filename, hash_val))
+
+    logger.info(
+        f"Pre-filtered: {pre_skipped} already uploaded, "
+        f"{len(to_upload)} to upload"
+    )
+
+    if not to_upload:
+        logger.info("Nothing new to upload.")
+        conn.close()
+        return
+
     sent = 0
-    skipped = 0
     failed = 0
     errors_list = []
 
-    app = Client("single_bot", API_ID, API_HASH, bot_token=BOT_TOKEN)
+    # Global flood gate: when any task hits FloodWait, ALL tasks pause
+    flood_until = 0.0
+    flood_lock = asyncio.Lock()
 
-    # Mutable container so nested function can read the resolved ID
+    app = Client("single_bot", API_ID, API_HASH, bot_token=BOT_TOKEN)
     target = {"chat_id": CHANNEL_ID}
 
-    async def safe_db_check(hash_val):
-        async with db_lock:
-            return _already_uploaded(conn, hash_val)
+    async def wait_for_flood():
+        """If a global flood wait is active, sleep until it's over."""
+        nonlocal flood_until
+        now = asyncio.get_event_loop().time()
+        if flood_until > now:
+            wait = flood_until - now
+            logger.info(f"Global flood gate: waiting {wait:.0f}s")
+            await asyncio.sleep(wait)
 
-    async def safe_db_mark(hash_val, filename):
-        async with db_lock:
-            _mark_uploaded(conn, hash_val, filename)
+    async def set_flood_wait(seconds):
+        """Set a global flood wait that affects all tasks."""
+        nonlocal flood_until
+        async with flood_lock:
+            new_until = asyncio.get_event_loop().time() + seconds + 2
+            if new_until > flood_until:
+                flood_until = new_until
+                logger.warning(f"Global flood gate set for {seconds + 2}s")
 
-    async def upload_one(path, filename):
-        nonlocal sent, skipped, failed
-
-        chat_id = target["chat_id"]
+    async def send_file(chat_id, path, filename, ext):
+        """Send a single file with the appropriate method."""
         temp_video = None
         thumb_path = None
 
         try:
-            hash_val = await asyncio.to_thread(file_hash, path)
-            if hash_val is None:
-                logger.error(f"Hash failed: {filename}")
-                failed += 1
-                errors_list.append((filename, "hash failed"))
-                return
+            if ext in VIDEO_EXT:
+                converted, is_temp = await asyncio.to_thread(
+                    convert_to_streamable, path
+                )
+                if is_temp:
+                    temp_video = converted
 
-            if await safe_db_check(hash_val):
-                skipped += 1
-                return
+                thumb_path = await asyncio.to_thread(
+                    generate_thumbnail, converted
+                )
+                duration = await asyncio.to_thread(
+                    get_video_duration, converted
+                )
+                width, height = await asyncio.to_thread(
+                    get_video_dimensions, converted
+                )
 
-            ext = os.path.splitext(filename)[1].lower()
-            retries = 0
+                await app.send_video(
+                    chat_id=chat_id,
+                    video=converted,
+                    caption=filename,
+                    supports_streaming=True,
+                    thumb=thumb_path,
+                    duration=duration,
+                    width=width,
+                    height=height
+                )
 
-            while retries <= MAX_RETRIES:
-                try:
-                    async with semaphore:
+            elif ext in IMAGE_EXT:
+                await app.send_photo(
+                    chat_id=chat_id,
+                    photo=path,
+                    caption=filename
+                )
 
-                        if ext in VIDEO_EXT:
-                            converted, is_temp = await asyncio.to_thread(
-                                convert_to_streamable, path
-                            )
-                            if is_temp:
-                                temp_video = converted
+            elif ext in GIF_EXT:
+                await app.send_animation(
+                    chat_id=chat_id,
+                    animation=path,
+                    caption=filename
+                )
 
-                            thumb_path = await asyncio.to_thread(
-                                generate_thumbnail, converted
-                            )
-
-                            duration = await asyncio.to_thread(
-                                get_video_duration, converted
-                            )
-                            width, height = await asyncio.to_thread(
-                                get_video_dimensions, converted
-                            )
-
-                            await app.send_video(
-                                chat_id=chat_id,
-                                video=converted,
-                                caption=filename,
-                                supports_streaming=True,
-                                thumb=thumb_path,
-                                duration=duration,
-                                width=width,
-                                height=height
-                            )
-
-                        elif ext in IMAGE_EXT:
-                            await app.send_photo(
-                                chat_id=chat_id,
-                                photo=path,
-                                caption=filename
-                            )
-
-                        elif ext in GIF_EXT:
-                            await app.send_animation(
-                                chat_id=chat_id,
-                                animation=path,
-                                caption=filename
-                            )
-
-                        else:
-                            await app.send_document(
-                                chat_id=chat_id,
-                                document=path,
-                                caption=filename,
-                                force_document=True
-                            )
-
-                    await safe_db_mark(hash_val, filename)
-                    sent += 1
-                    return
-
-                except FloodWait as e:
-                    retries += 1
-                    wait_time = e.value + 2
-                    logger.warning(
-                        f"FloodWait {e.value}s for {filename} "
-                        f"(retry {retries}/{MAX_RETRIES})"
-                    )
-                    if retries > MAX_RETRIES:
-                        break
-                    await asyncio.sleep(wait_time)
-
-                except RPCError as e:
-                    retries += 1
-                    err_msg = str(e)
-                    logger.error(
-                        f"RPCError uploading {filename}: {err_msg} "
-                        f"(retry {retries}/{MAX_RETRIES})"
-                    )
-                    if retries > MAX_RETRIES:
-                        break
-                    await asyncio.sleep(5)
-
-                except (ConnectionError, TimeoutError, OSError) as e:
-                    retries += 1
-                    logger.error(
-                        f"Connection error uploading {filename}: {e} "
-                        f"(retry {retries}/{MAX_RETRIES})"
-                    )
-                    if retries > MAX_RETRIES:
-                        break
-                    await asyncio.sleep(10)
-
-                except Exception as e:
-                    logger.exception(f"Unexpected error uploading {filename}: {e}")
-                    failed += 1
-                    errors_list.append((filename, str(e)))
-                    return
-
-            # Exhausted all retries
-            logger.error(f"Max retries exceeded for {filename}")
-            failed += 1
-            errors_list.append((filename, "max retries exceeded"))
-
+            else:
+                await app.send_document(
+                    chat_id=chat_id,
+                    document=path,
+                    caption=filename,
+                    force_document=True
+                )
         finally:
             cleanup_temp_files(temp_video, thumb_path)
 
+    async def upload_sequential():
+        """Upload files one by one with rate limiting."""
+        nonlocal sent, failed
+
+        chat_id = target["chat_id"]
+
+        with tqdm(total=len(to_upload), desc="Uploading", unit="file") as pbar:
+            for path, filename, hash_val in to_upload:
+
+                ext = os.path.splitext(filename)[1].lower()
+                retries = 0
+                success = False
+
+                while retries <= MAX_RETRIES:
+                    try:
+                        # Respect global flood gate
+                        await wait_for_flood()
+
+                        # Rate limit between sends
+                        await asyncio.sleep(DELAY_BETWEEN)
+
+                        await send_file(chat_id, path, filename, ext)
+
+                        # Mark in DB
+                        async with db_lock:
+                            _mark_uploaded(conn, hash_val, filename)
+
+                        sent += 1
+                        success = True
+                        break
+
+                    except FloodWait as e:
+                        retries += 1
+                        await set_flood_wait(e.value)
+                        logger.warning(
+                            f"FloodWait {e.value}s for {filename} "
+                            f"(retry {retries}/{MAX_RETRIES})"
+                        )
+                        if retries > MAX_RETRIES:
+                            break
+                        await asyncio.sleep(e.value + 2)
+
+                    except RPCError as e:
+                        retries += 1
+                        logger.error(
+                            f"RPCError uploading {filename}: {e} "
+                            f"(retry {retries}/{MAX_RETRIES})"
+                        )
+                        if retries > MAX_RETRIES:
+                            break
+                        await asyncio.sleep(5)
+
+                    except (ConnectionError, TimeoutError, OSError) as e:
+                        retries += 1
+                        logger.error(
+                            f"Connection error uploading {filename}: {e} "
+                            f"(retry {retries}/{MAX_RETRIES})"
+                        )
+                        if retries > MAX_RETRIES:
+                            break
+                        await asyncio.sleep(10)
+
+                    except Exception as e:
+                        logger.exception(
+                            f"Unexpected error uploading {filename}: {e}"
+                        )
+                        failed += 1
+                        errors_list.append((filename, str(e)))
+                        break
+
+                if not success and retries > MAX_RETRIES:
+                    logger.error(f"Max retries exceeded for {filename}")
+                    failed += 1
+                    errors_list.append((filename, "max retries exceeded"))
+
+                pbar.update(1)
+
     async with app:
-        # Verify bot can access the channel and resolve numeric ID
+        # Verify bot can access the channel
         try:
             chat = await app.get_chat(CHANNEL_ID)
             logger.info(f"Connected to channel: {chat.title} (ID: {chat.id})")
@@ -400,19 +442,14 @@ async def run_uploader():
             conn.close()
             return
 
-        tasks = [upload_one(p, f) for p, f in files]
-
-        with tqdm(total=len(tasks), desc="Uploading", unit="file") as pbar:
-            for coro in asyncio.as_completed(tasks):
-                await coro
-                pbar.update(1)
+        await upload_sequential()
 
     # Final report
     print()
     print("=" * 40)
     print("🔥 FINISHED")
     print(f"✅ Sent:    {sent}")
-    print(f"⏭️  Skipped: {skipped}")
+    print(f"⏭️  Skipped: {pre_skipped}")
     print(f"❌ Failed:  {failed}")
     print(f"📁 Total:   {len(files)}")
     print("=" * 40)
