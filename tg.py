@@ -6,7 +6,7 @@ import sqlite3
 import logging
 import subprocess
 import threading
-from datetime import datetime
+import datetime
 from pyrogram import Client
 from pyrogram.errors import FloodWait, RPCError
 from pyrogram.session import Session
@@ -96,7 +96,7 @@ def mark_uploaded(conn, hash_value, filename):
             c = conn.cursor()
             c.execute(
                 "INSERT OR IGNORE INTO uploaded VALUES (?, ?, ?)",
-                (hash_value, filename, datetime.now(datetime.timezone.utc).isoformat())
+                (hash_value, filename, datetime.datetime.now(datetime.timezone.utc).isoformat())
             )
             conn.commit()
         except sqlite3.Error as e:
