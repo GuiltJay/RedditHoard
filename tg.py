@@ -96,7 +96,7 @@ def mark_uploaded(conn, hash_value, filename):
             c = conn.cursor()
             c.execute(
                 "INSERT OR IGNORE INTO uploaded VALUES (?, ?, ?)",
-                (hash_value, filename, datetime.utcnow().isoformat())
+                (hash_value, filename, datetime.now(datetime.timezone.utc).isoformat())
             )
             conn.commit()
         except sqlite3.Error as e:
