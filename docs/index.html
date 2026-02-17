@@ -369,8 +369,7 @@
 <footer>
   RedditHoard Analytics Dashboard &middot; Auto-generated from <code>reddit_stats.db</code>
 </footer>
-
-<script>
+  <script>
 // ====================== GLOBALS ======================
 let DATA = {};
 const COLORS = {
@@ -399,7 +398,7 @@ Chart.defaults.plugins.tooltip.cornerRadius = 8;
 Chart.defaults.plugins.tooltip.padding = 10;
 
 // ====================== UTILS ======================
-function fmt(n) { return n == null ? '—' : Number(n).toLocaleString(); }
+function fmt(n) { return n == null ? '\u2014' : Number(n).toLocaleString(); }
 function pct(a, b) { return b ? (a / b * 100).toFixed(1) + '%' : '0%'; }
 function pctNum(a, b) { return b ? (a / b * 100) : 0; }
 const DOW_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -412,39 +411,46 @@ function makeGradient(ctx, color) {
 }
 
 function utcToLocal(ts) {
-  if (!ts) return '—';
-  const d = new Date(ts * 1000);
-  return d.toISOString().split('T')[0];
+  if (!ts) return '\u2014';
+  return new Date(ts * 1000).toISOString().split('T')[0];
 }
 
 function colorForIntensity(val, max) {
   if (val === 0) return '#161b22';
-  const ratio = Math.min(val / Math.max(max, 1), 1);
+  var ratio = Math.min(val / Math.max(max, 1), 1);
   if (ratio < 0.25) return '#0e4429';
   if (ratio < 0.5) return '#006d32';
   if (ratio < 0.75) return '#26a641';
   return '#39d353';
 }
 
+function escapeHtml(s) {
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
+
 // ====================== DATA LOADING ======================
 async function loadData() {
   try {
-    const r = await fetch('dashboard_data.json');
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    var r = await fetch('dashboard_data.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' - Could not load dashboard_data.json');
     DATA = await r.json();
     buildDashboard();
   } catch (e) {
     document.getElementById('loading').innerHTML =
-      '<div style="color:#f85149;text-align:center;padding:40px">' +
-      '<h2 style="margin-bottom:12px">⚠️ Failed to Load Data</h2>' +
-      '<p style="color:#8b949e">Could not load <code>dashboard_data.json</code></p>' +
-      '<p style="color:#8b949e;margin-top:8px">Run <code>python export_dashboard_data.py</code> first.</p>' +
-      '<p style="color:#f85149;margin-top:12px;font-size:0.8rem">' + e.message + '</p>' +
+      '<div style="color:#f85149;text-align:center;padding:40px;max-width:500px">' +
+      '<div style="font-size:3rem;margin-bottom:16px">\u26A0\uFE0F</div>' +
+      '<h2 style="margin-bottom:12px;color:#e6edf3">Failed to Load Data</h2>' +
+      '<p style="color:#8b949e;margin-bottom:8px">Could not load <code style="background:#1c2333;padding:2px 6px;border-radius:4px">dashboard_data.json</code></p>' +
+      '<p style="color:#8b949e;margin-bottom:16px">Make sure you run the export script first:</p>' +
+      '<code style="background:#1c2333;padding:8px 16px;border-radius:6px;display:block;color:#58a6ff">python export_dashboard_data.py</code>' +
+      '<p style="color:#f85149;margin-top:16px;font-size:0.8rem">' + escapeHtml(e.message) + '</p>' +
       '</div>';
   }
 }
 
-// ====================== BUILD DASHBOARD ======================
+// ====================== MAIN BUILD ======================
 function buildDashboard() {
   buildKPIs();
   buildTabs();
@@ -455,14 +461,13 @@ function buildDashboard() {
   buildTables();
   buildHeatmap();
 
-  // Header meta
-  const meta = document.getElementById('headerMeta');
-  const parts = [];
+  var meta = document.getElementById('headerMeta');
+  var parts = [];
   if (DATA.first_fetch_date) parts.push('Since ' + DATA.first_fetch_date);
   if (DATA.last_fetch_date) parts.push('Last run ' + DATA.last_fetch_date);
-  meta.textContent = parts.join(' · ');
+  if (DATA.total_posts) parts.push(fmt(DATA.total_posts) + ' posts tracked');
+  meta.textContent = parts.join(' \u00B7 ');
 
-  // Hide loading
   setTimeout(function() {
     document.getElementById('loading').classList.add('hidden');
     setTimeout(function() {
@@ -474,107 +479,100 @@ function buildDashboard() {
 // ====================== KPI CARDS ======================
 function buildKPIs() {
   var grid = document.getElementById('kpiGrid');
-  var avgDl = DATA.total_posts > 0 ? (DATA.total_files_downloaded / DATA.total_posts).toFixed(2) : '0';
-  var dlRate = DATA.total_posts > 0
-    ? ((DATA.media_split.with_media / DATA.total_posts) * 100).toFixed(1) + '%'
-    : '0%';
-  var postsPerDay = DATA.total_active_days > 0
-    ? Math.round(DATA.total_posts / DATA.total_active_days)
-    : 0;
+  var tp = DATA.total_posts || 0;
+  var tf = DATA.total_files_downloaded || 0;
+  var ts = DATA.total_subreddits || 0;
+  var td = DATA.total_active_days || 0;
+  var ms = DATA.media_split || { with_media: 0, without_media: 0 };
+
+  var avgDl = tp > 0 ? (tf / tp).toFixed(2) : '0';
+  var dlRate = tp > 0 ? ((ms.with_media / tp) * 100).toFixed(1) + '%' : '0%';
+  var postsPerDay = td > 0 ? Math.round(tp / td) : 0;
+  var filesPerDay = td > 0 ? Math.round(tf / td) : 0;
 
   var cards = [
-    { value: fmt(DATA.total_posts), label: 'Total Posts', cls: 'accent' },
-    { value: fmt(DATA.total_files_downloaded), label: 'Files Downloaded', cls: 'green' },
-    { value: fmt(DATA.total_subreddits), label: 'Subreddits', cls: 'blue' },
-    { value: fmt(DATA.total_active_days), label: 'Active Days', cls: 'purple' },
+    { value: fmt(tp), label: 'Total Posts', cls: 'accent' },
+    { value: fmt(tf), label: 'Files Downloaded', cls: 'green' },
+    { value: fmt(ts), label: 'Subreddits', cls: 'blue' },
+    { value: fmt(td), label: 'Active Days', cls: 'purple' },
     { value: dlRate, label: 'Media Hit Rate', cls: 'yellow' },
     { value: avgDl, label: 'Avg Files / Post', cls: 'cyan' },
     { value: fmt(postsPerDay), label: 'Posts / Day', cls: 'accent' },
-    { value: fmt(DATA.media_split.with_media), label: 'Posts with Media', cls: 'green' }
+    { value: fmt(filesPerDay), label: 'Files / Day', cls: 'green' }
   ];
 
   var html = '';
   for (var i = 0; i < cards.length; i++) {
     html += '<div class="kpi-card ' + cards[i].cls + '">' +
       '<div class="value">' + cards[i].value + '</div>' +
-      '<div class="label">' + cards[i].label + '</div>' +
-      '</div>';
+      '<div class="label">' + cards[i].label + '</div></div>';
   }
   grid.innerHTML = html;
 }
 
 // ====================== TABS ======================
 function buildTabs() {
-  var btns = document.querySelectorAll('.tab-btn');
-  for (var i = 0; i < btns.length; i++) {
-    btns[i].addEventListener('click', function() {
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
       var target = this.getAttribute('data-tab');
-      var allBtns = document.querySelectorAll('.tab-btn');
-      var allTabs = document.querySelectorAll('.tab-content');
-      for (var j = 0; j < allBtns.length; j++) allBtns[j].classList.remove('active');
-      for (var j = 0; j < allTabs.length; j++) allTabs[j].classList.remove('active');
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
       this.classList.add('active');
       document.getElementById('tab-' + target).classList.add('active');
     });
-  }
+  });
 }
 
 // ====================== OVERVIEW CHARTS ======================
 function buildOverviewCharts() {
   // Cumulative Posts
   var cumData = DATA.cumulative_posts || [];
-  var cumCtx = document.getElementById('chartCumulative').getContext('2d');
-  new Chart(cumCtx, {
-    type: 'line',
-    data: {
-      labels: cumData.map(function(d) { return d.fetched_date; }),
-      datasets: [{
-        label: 'Cumulative Posts',
-        data: cumData.map(function(d) { return d.cumulative; }),
-        borderColor: COLORS.accent,
-        backgroundColor: makeGradient(cumCtx, COLORS.accent),
-        borderWidth: 2,
-        fill: true,
-        tension: 0.3,
-        pointRadius: cumData.length > 60 ? 0 : 3,
-        pointHoverRadius: 5,
-        pointBackgroundColor: COLORS.accent
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: true }
+  if (cumData.length > 0) {
+    var ctx = document.getElementById('chartCumulative').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: cumData.map(function(d) { return d.fetched_date; }),
+        datasets: [{
+          label: 'Cumulative Posts',
+          data: cumData.map(function(d) { return d.cumulative; }),
+          borderColor: COLORS.accent,
+          backgroundColor: makeGradient(ctx, COLORS.accent),
+          borderWidth: 2, fill: true, tension: 0.3,
+          pointRadius: cumData.length > 60 ? 0 : 3,
+          pointHoverRadius: 5, pointBackgroundColor: COLORS.accent
+        }]
       },
-      plugins: { legend: { display: false } }
-    }
-  });
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { grid: { display: false } }, y: { beginAtZero: true } },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
 
   // Media Split Doughnut
+  var ms = DATA.media_split || { with_media: 0, without_media: 0 };
   var msCtx = document.getElementById('chartMediaSplit').getContext('2d');
   new Chart(msCtx, {
     type: 'doughnut',
     data: {
       labels: ['With Media', 'Without Media'],
       datasets: [{
-        data: [DATA.media_split.with_media, DATA.media_split.without_media],
+        data: [ms.with_media, ms.without_media],
         backgroundColor: [COLORS.green, COLORS.red + '60'],
-        borderColor: ['transparent', 'transparent'],
         borderWidth: 0
       }]
     },
     options: {
-      responsive: true,
-      cutout: '65%',
+      responsive: true, cutout: '65%',
       plugins: {
         legend: { position: 'bottom' },
         tooltip: {
           callbacks: {
-            label: function(ctx) {
-              var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
-              return ctx.label + ': ' + fmt(ctx.raw) + ' (' + pct(ctx.raw, total) + ')';
+            label: function(c) {
+              var total = c.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+              return c.label + ': ' + fmt(c.raw) + ' (' + pct(c.raw, total) + ')';
             }
           }
         }
@@ -584,155 +582,126 @@ function buildOverviewCharts() {
 
   // Source Distribution Pie
   var srcTotals = DATA.source_totals || [];
-  var spCtx = document.getElementById('chartSourcePie').getContext('2d');
-  new Chart(spCtx, {
-    type: 'doughnut',
-    data: {
-      labels: srcTotals.map(function(d) { return d.source; }),
-      datasets: [{
-        data: srcTotals.map(function(d) { return d.posts; }),
-        backgroundColor: srcTotals.map(function(d) {
-          return SOURCE_COLORS[d.source] || COLORS.accent;
-        }),
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      cutout: '65%',
-      plugins: {
-        legend: { position: 'bottom' },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) {
-              var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
-              return ctx.label + ': ' + fmt(ctx.raw) + ' posts (' + pct(ctx.raw, total) + ')';
+  if (srcTotals.length > 0) {
+    var spCtx = document.getElementById('chartSourcePie').getContext('2d');
+    new Chart(spCtx, {
+      type: 'doughnut',
+      data: {
+        labels: srcTotals.map(function(d) { return d.source; }),
+        datasets: [{
+          data: srcTotals.map(function(d) { return d.posts; }),
+          backgroundColor: srcTotals.map(function(d) {
+            return SOURCE_COLORS[d.source] || COLORS.accent;
+          }),
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true, cutout: '65%',
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: function(c) {
+                var total = c.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                return c.label + ': ' + fmt(c.raw) + ' (' + pct(c.raw, total) + ')';
+              }
             }
           }
         }
       }
-    }
-  });
+    });
+  }
 
   // Download Rate Line
   var dlRate = DATA.download_rate_by_date || [];
-  var drCtx = document.getElementById('chartDlRate').getContext('2d');
-  new Chart(drCtx, {
-    type: 'line',
-    data: {
-      labels: dlRate.map(function(d) { return d.fetched_date; }),
-      datasets: [{
-        label: 'DL Rate %',
-        data: dlRate.map(function(d) { return pctNum(d.with_dl, d.total); }),
-        borderColor: COLORS.yellow,
-        backgroundColor: makeGradient(drCtx, COLORS.yellow),
-        borderWidth: 2,
-        fill: true,
-        tension: 0.3,
-        pointRadius: dlRate.length > 60 ? 0 : 3,
-        pointHoverRadius: 5
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: true, max: 100, ticks: { callback: function(v) { return v + '%'; } } }
+  if (dlRate.length > 0) {
+    var drCtx = document.getElementById('chartDlRate').getContext('2d');
+    new Chart(drCtx, {
+      type: 'line',
+      data: {
+        labels: dlRate.map(function(d) { return d.fetched_date; }),
+        datasets: [{
+          label: 'DL Rate %',
+          data: dlRate.map(function(d) { return pctNum(d.with_dl, d.total); }),
+          borderColor: COLORS.yellow,
+          backgroundColor: makeGradient(drCtx, COLORS.yellow),
+          borderWidth: 2, fill: true, tension: 0.3,
+          pointRadius: dlRate.length > 60 ? 0 : 3, pointHoverRadius: 5
+        }]
       },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) { return ctx.parsed.y.toFixed(1) + '%'; }
-          }
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, max: 100, ticks: { callback: function(v) { return v + '%'; } } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: function(c) { return c.parsed.y.toFixed(1) + '%'; } } }
         }
       }
-    }
-  });
+    });
+  }
 
   // Monthly Bar
   var monthly = DATA.posts_by_month || [];
-  var moCtx = document.getElementById('chartMonthly').getContext('2d');
-  new Chart(moCtx, {
-    type: 'bar',
-    data: {
-      labels: monthly.map(function(d) { return d.month; }),
-      datasets: [
-        {
-          label: 'Posts',
-          data: monthly.map(function(d) { return d.cnt; }),
-          backgroundColor: COLORS.blue + 'B0',
-          borderRadius: 4
-        },
-        {
-          label: 'Downloads',
-          data: monthly.map(function(d) { return d.dl; }),
-          backgroundColor: COLORS.green + 'B0',
-          borderRadius: 4
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: true }
+  if (monthly.length > 0) {
+    var moCtx = document.getElementById('chartMonthly').getContext('2d');
+    new Chart(moCtx, {
+      type: 'bar',
+      data: {
+        labels: monthly.map(function(d) { return d.month; }),
+        datasets: [
+          { label: 'Posts', data: monthly.map(function(d) { return d.cnt; }), backgroundColor: COLORS.blue + 'B0', borderRadius: 4 },
+          { label: 'Downloads', data: monthly.map(function(d) { return d.dl; }), backgroundColor: COLORS.green + 'B0', borderRadius: 4 }
+        ]
       },
-      plugins: { legend: { position: 'top' } }
-    }
-  });
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { grid: { display: false } }, y: { beginAtZero: true } },
+        plugins: { legend: { position: 'top' } }
+      }
+    });
+  }
 }
 
 // ====================== TEMPORAL CHARTS ======================
 function buildTemporalCharts() {
   // Daily Posts & Files
   var daily = DATA.posts_by_date || [];
-  var ddCtx = document.getElementById('chartDaily').getContext('2d');
-  new Chart(ddCtx, {
-    type: 'bar',
-    data: {
-      labels: daily.map(function(d) { return d.fetched_date; }),
-      datasets: [
-        {
-          label: 'Posts Fetched',
-          data: daily.map(function(d) { return d.cnt; }),
-          backgroundColor: COLORS.blue + 'B0',
-          borderRadius: 3,
-          order: 2
-        },
-        {
-          label: 'Files Downloaded',
-          data: daily.map(function(d) { return d.dl; }),
-          type: 'line',
-          borderColor: COLORS.green,
-          backgroundColor: 'transparent',
-          borderWidth: 2,
-          tension: 0.3,
-          pointRadius: daily.length > 60 ? 0 : 3,
-          pointHoverRadius: 5,
-          order: 1
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: true }
+  if (daily.length > 0) {
+    var ddCtx = document.getElementById('chartDaily').getContext('2d');
+    new Chart(ddCtx, {
+      type: 'bar',
+      data: {
+        labels: daily.map(function(d) { return d.fetched_date; }),
+        datasets: [
+          {
+            label: 'Posts Fetched', data: daily.map(function(d) { return d.cnt; }),
+            backgroundColor: COLORS.blue + 'B0', borderRadius: 3, order: 2
+          },
+          {
+            label: 'Files Downloaded', data: daily.map(function(d) { return d.dl; }),
+            type: 'line', borderColor: COLORS.green, backgroundColor: 'transparent',
+            borderWidth: 2, tension: 0.3,
+            pointRadius: daily.length > 60 ? 0 : 3, pointHoverRadius: 5, order: 1
+          }
+        ]
       },
-      plugins: { legend: { position: 'top' } }
-    }
-  });
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { grid: { display: false } }, y: { beginAtZero: true } },
+        plugins: { legend: { position: 'top' } }
+      }
+    });
+  }
 
   // Hourly
   var hourly = DATA.posts_by_hour || [];
-  var hourLabels = [];
-  var hourValues = [];
+  var hourLabels = [], hourValues = [];
   for (var h = 0; h < 24; h++) {
-    hourLabels.push(h.toString().padStart(2, '0') + ':00');
+    hourLabels.push(String(h).padStart(2, '0') + ':00');
     var found = hourly.find(function(d) { return d.hour === h; });
     hourValues.push(found ? found.cnt : 0);
   }
@@ -742,8 +711,7 @@ function buildTemporalCharts() {
     data: {
       labels: hourLabels,
       datasets: [{
-        label: 'Posts',
-        data: hourValues,
+        label: 'Posts', data: hourValues,
         backgroundColor: hourValues.map(function(v, i) {
           return (i >= 6 && i <= 18) ? COLORS.yellow + 'B0' : COLORS.purple + 'B0';
         }),
@@ -751,12 +719,8 @@ function buildTemporalCharts() {
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: true }
-      },
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { grid: { display: false } }, y: { beginAtZero: true } },
       plugins: { legend: { display: false } }
     }
   });
@@ -777,15 +741,13 @@ function buildTemporalCharts() {
         data: dowValues,
         backgroundColor: [
           COLORS.red + '80', COLORS.blue + '80', COLORS.green + '80',
-          COLORS.purple + '80', COLORS.yellow + '80', COLORS.cyan + '80',
-          COLORS.pink + '80'
+          COLORS.purple + '80', COLORS.yellow + '80', COLORS.cyan + '80', COLORS.pink + '80'
         ],
         borderWidth: 0
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       scales: { r: { beginAtZero: true, grid: { color: '#30363d' } } },
       plugins: { legend: { position: 'bottom' } }
     }
@@ -793,318 +755,442 @@ function buildTemporalCharts() {
 
   // Daily Stats by Source (Stacked)
   var dss = DATA.daily_stats_by_source || [];
-  var allDates = [];
-  var sourceMap = {};
+  var allDates = [], sourcePostMap = {};
   for (var i = 0; i < dss.length; i++) {
-    var entry = dss[i];
-    if (allDates.indexOf(entry.date) === -1) allDates.push(entry.date);
-    if (!sourceMap[entry.source]) sourceMap[entry.source] = {};
-    sourceMap[entry.source][entry.date] = (sourceMap[entry.source][entry.date] || 0) + entry.posts;
+    if (allDates.indexOf(dss[i].date) === -1) allDates.push(dss[i].date);
+    if (!sourcePostMap[dss[i].source]) sourcePostMap[dss[i].source] = {};
+    sourcePostMap[dss[i].source][dss[i].date] =
+      (sourcePostMap[dss[i].source][dss[i].date] || 0) + dss[i].posts;
   }
   allDates.sort();
-  var stackedDatasets = [];
-  var srcKeys = Object.keys(sourceMap);
+  var stackedDS = [];
+  var srcKeys = Object.keys(sourcePostMap);
   for (var s = 0; s < srcKeys.length; s++) {
     var src = srcKeys[s];
-    stackedDatasets.push({
-      label: src,
-      data: allDates.map(function(dt) { return sourceMap[src][dt] || 0; }),
-      backgroundColor: (SOURCE_COLORS[src] || PALETTE[s % PALETTE.length]) + 'B0',
-      borderRadius: 2
+    stackedDS.push({
+      label: src, backgroundColor: (SOURCE_COLORS[src] || PALETTE[s]) + 'B0', borderRadius: 2,
+      data: allDates.map(function(dt) { return sourcePostMap[src][dt] || 0; })
     });
   }
-  var dsCtx = document.getElementById('chartDailySource').getContext('2d');
-  new Chart(dsCtx, {
-    type: 'bar',
-    data: { labels: allDates, datasets: stackedDatasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { stacked: true, grid: { display: false } },
-        y: { stacked: true, beginAtZero: true }
-      },
-      plugins: { legend: { position: 'top' } }
-    }
-  });
+  if (allDates.length > 0) {
+    var dsCtx = document.getElementById('chartDailySource').getContext('2d');
+    new Chart(dsCtx, {
+      type: 'bar',
+      data: { labels: allDates, datasets: stackedDS },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true } },
+        plugins: { legend: { position: 'top' } }
+      }
+    });
+  }
 }
 
 // ====================== SUBREDDIT CHARTS ======================
 function buildSubredditCharts() {
-  // Top 25 Subreddits by Posts (horizontal bar)
+  // Top 25 by Posts
   var topSubs = (DATA.top_subreddits || []).slice(0, 25);
-  var tsCtx = document.getElementById('chartTopSubs').getContext('2d');
-  new Chart(tsCtx, {
-    type: 'bar',
-    data: {
-      labels: topSubs.map(function(d) { return 'r/' + d.subreddit; }),
-      datasets: [
-        {
-          label: 'Posts',
-          data: topSubs.map(function(d) { return d.cnt; }),
-          backgroundColor: COLORS.accent + 'B0',
-          borderRadius: 3
-        },
-        {
-          label: 'Downloads',
-          data: topSubs.map(function(d) { return d.dl; }),
-          backgroundColor: COLORS.green + 'B0',
-          borderRadius: 3
-        }
-      ]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { beginAtZero: true },
-        y: { grid: { display: false } }
+  if (topSubs.length > 0) {
+    var tsCtx = document.getElementById('chartTopSubs').getContext('2d');
+    new Chart(tsCtx, {
+      type: 'bar',
+      data: {
+        labels: topSubs.map(function(d) { return 'r/' + d.subreddit; }),
+        datasets: [
+          { label: 'Posts', data: topSubs.map(function(d) { return d.cnt; }), backgroundColor: COLORS.accent + 'B0', borderRadius: 3 },
+          { label: 'Downloads', data: topSubs.map(function(d) { return d.dl; }), backgroundColor: COLORS.green + 'B0', borderRadius: 3 }
+        ]
       },
-      plugins: { legend: { position: 'top' } }
-    }
-  });
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        scales: { x: { beginAtZero: true }, y: { grid: { display: false } } },
+        plugins: { legend: { position: 'top' } }
+      }
+    });
+  }
 
   // Avg Downloads per Post
   var avgDl = (DATA.avg_downloads_per_sub || []).slice(0, 20);
-  var adCtx = document.getElementById('chartAvgDl').getContext('2d');
-  new Chart(adCtx, {
-    type: 'bar',
-    data: {
-      labels: avgDl.map(function(d) { return 'r/' + d.subreddit; }),
-      datasets: [{
-        label: 'Avg DL/Post',
-        data: avgDl.map(function(d) { return d.avg_dl; }),
-        backgroundColor: avgDl.map(function(_, i) {
-          return PALETTE[i % PALETTE.length] + 'B0';
-        }),
-        borderRadius: 3
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { beginAtZero: true },
-        y: { grid: { display: false } }
+  if (avgDl.length > 0) {
+    var adCtx = document.getElementById('chartAvgDl').getContext('2d');
+    new Chart(adCtx, {
+      type: 'bar',
+      data: {
+        labels: avgDl.map(function(d) { return 'r/' + d.subreddit; }),
+        datasets: [{
+          label: 'Avg DL/Post', data: avgDl.map(function(d) { return d.avg_dl; }),
+          backgroundColor: avgDl.map(function(_, i) { return PALETTE[i % PALETTE.length] + 'B0'; }),
+          borderRadius: 3
+        }]
       },
-      plugins: { legend: { display: false } }
-    }
-  });
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        scales: { x: { beginAtZero: true }, y: { grid: { display: false } } },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
 
-  // Top Subs by Files Downloaded
-  var subsByFiles = (DATA.top_subreddits || [])
-    .slice()
-    .sort(function(a, b) { return b.dl - a.dl; })
-    .slice(0, 20);
-  var sfCtx = document.getElementById('chartSubsByFiles').getContext('2d');
-  new Chart(sfCtx, {
-    type: 'bar',
-    data: {
-      labels: subsByFiles.map(function(d) { return 'r/' + d.subreddit; }),
-      datasets: [{
-        label: 'Files Downloaded',
-        data: subsByFiles.map(function(d) { return d.dl; }),
-        backgroundColor: subsByFiles.map(function(_, i) {
-          return PALETTE[i % PALETTE.length] + 'B0';
-        }),
-        borderRadius: 3
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { beginAtZero: true },
-        y: { grid: { display: false } }
+  // Top Subs by Files
+  var subsByFiles = (DATA.top_subreddits || []).slice().sort(function(a, b) { return b.dl - a.dl; }).slice(0, 20);
+  if (subsByFiles.length > 0) {
+    var sfCtx = document.getElementById('chartSubsByFiles').getContext('2d');
+    new Chart(sfCtx, {
+      type: 'bar',
+      data: {
+        labels: subsByFiles.map(function(d) { return 'r/' + d.subreddit; }),
+        datasets: [{
+          label: 'Files', data: subsByFiles.map(function(d) { return d.dl; }),
+          backgroundColor: subsByFiles.map(function(_, i) { return PALETTE[i % PALETTE.length] + 'B0'; }),
+          borderRadius: 3
+        }]
       },
-      plugins: { legend: { display: false } }
-    }
-  });
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        scales: { x: { beginAtZero: true }, y: { grid: { display: false } } },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
 }
 
 // ====================== HEATMAP ======================
 function buildHeatmap() {
   var hmData = DATA.subreddit_heatmap || [];
+  var container = document.getElementById('heatmapContainer');
   if (hmData.length === 0) {
-    document.getElementById('heatmapContainer').innerHTML =
-      '<p style="color:var(--text-muted);padding:20px;text-align:center">No heatmap data available</p>';
+    container.innerHTML = '<p style="color:var(--text-muted);padding:20px;text-align:center">No heatmap data available</p>';
     return;
   }
 
-  // Collect unique subs and dates
-  var subsSet = {};
-  var datesSet = {};
-  var maxVal = 0;
-  var lookup = {};
+  var subsSet = {}, datesSet = {}, lookup = {}, maxVal = 0;
   for (var i = 0; i < hmData.length; i++) {
-    var item = hmData[i];
-    subsSet[item.subreddit] = true;
-    datesSet[item.date] = true;
-    var key = item.subreddit + '|' + item.date;
-    lookup[key] = item.count;
-    if (item.count > maxVal) maxVal = item.count;
+    subsSet[hmData[i].subreddit] = true;
+    datesSet[hmData[i].date] = true;
+    var key = hmData[i].subreddit + '|' + hmData[i].date;
+    lookup[key] = hmData[i].count;
+    if (hmData[i].count > maxVal) maxVal = hmData[i].count;
   }
-
   var subs = Object.keys(subsSet);
   var dates = Object.keys(datesSet).sort();
 
-  // Build HTML table-style heatmap
   var html = '<table style="border-collapse:collapse;font-size:0.75rem;width:100%">';
-
-  // Header row with dates
-  html += '<tr><th style="padding:4px 8px;text-align:right;color:var(--text-muted);min-width:120px"></th>';
+  html += '<tr><th style="padding:4px 8px;min-width:120px"></th>';
   for (var d = 0; d < dates.length; d++) {
-    var shortDate = dates[d].substring(5); // MM-DD
     html += '<th style="padding:4px 2px;color:var(--text-muted);font-weight:400;font-size:0.6rem;' +
       'writing-mode:vertical-rl;transform:rotate(180deg);text-align:left;min-width:24px">' +
-      shortDate + '</th>';
+      dates[d].substring(5) + '</th>';
   }
   html += '</tr>';
 
-  // Data rows
   for (var s = 0; s < subs.length; s++) {
     html += '<tr><td style="padding:4px 8px;text-align:right;color:var(--text-muted);' +
-      'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;font-size:0.75rem">' +
-      'r/' + subs[s] + '</td>';
+      'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">r/' +
+      escapeHtml(subs[s]) + '</td>';
     for (var d = 0; d < dates.length; d++) {
-      var key = subs[s] + '|' + dates[d];
-      var val = lookup[key] || 0;
+      var val = lookup[subs[s] + '|' + dates[d]] || 0;
       var bg = colorForIntensity(val, maxVal);
-      var title = 'r/' + subs[s] + ' on ' + dates[d] + ': ' + val + ' posts';
-      html += '<td style="padding:2px;"><div style="width:20px;height:20px;border-radius:3px;' +
-        'background:' + bg + ';display:flex;align-items:center;justify-content:center;' +
-        'font-size:0.6rem;color:' + (val > 0 ? '#e6edf3' : 'transparent') + ';cursor:default" ' +
-        'title="' + title + '">' + (val > 0 ? val : '') + '</div></td>';
+      var title = 'r/' + subs[s] + ' on ' + dates[d] + ': ' + val;
+      html += '<td style="padding:2px"><div title="' + escapeHtml(title) + '" style="width:20px;height:20px;' +
+        'border-radius:3px;background:' + bg + ';display:flex;align-items:center;justify-content:center;' +
+        'font-size:0.6rem;color:' + (val > 0 ? '#e6edf3' : 'transparent') + '">' +
+        (val > 0 ? val : '') + '</div></td>';
     }
     html += '</tr>';
   }
-
   html += '</table>';
 
-  // Legend
   html += '<div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:0 8px">' +
     '<span style="color:var(--text-muted);font-size:0.7rem">Less</span>';
-  var legendColors = ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'];
-  for (var l = 0; l < legendColors.length; l++) {
-    html += '<div style="width:16px;height:16px;border-radius:3px;background:' +
-      legendColors[l] + '"></div>';
-  }
+  ['#161b22','#0e4429','#006d32','#26a641','#39d353'].forEach(function(c) {
+    html += '<div style="width:16px;height:16px;border-radius:3px;background:' + c + '"></div>';
+  });
   html += '<span style="color:var(--text-muted);font-size:0.7rem">More</span></div>';
-
-  document.getElementById('heatmapContainer').innerHTML = html;
+  container.innerHTML = html;
 }
 
 // ====================== SOURCE CHARTS ======================
 function buildSourceCharts() {
   var srcTotals = DATA.source_totals || [];
 
-  // Source Posts Bar
-  var sbCtx = document.getElementById('chartSourceBar').getContext('2d');
-  new Chart(sbCtx, {
-    type: 'bar',
-    data: {
-      labels: srcTotals.map(function(d) { return d.source; }),
-      datasets: [{
-        label: 'Posts',
-        data: srcTotals.map(function(d) { return d.posts; }),
-        backgroundColor: srcTotals.map(function(d) {
-          return (SOURCE_COLORS[d.source] || COLORS.accent) + 'B0';
-        }),
-        borderRadius: 6
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: true }
+  if (srcTotals.length > 0) {
+    // Posts by Source
+    var sbCtx = document.getElementById('chartSourceBar').getContext('2d');
+    new Chart(sbCtx, {
+      type: 'bar',
+      data: {
+        labels: srcTotals.map(function(d) { return d.source; }),
+        datasets: [{
+          label: 'Posts', data: srcTotals.map(function(d) { return d.posts; }),
+          backgroundColor: srcTotals.map(function(d) { return (SOURCE_COLORS[d.source] || COLORS.accent) + 'B0'; }),
+          borderRadius: 6
+        }]
       },
-      plugins: { legend: { display: false } }
-    }
-  });
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { grid: { display: false } }, y: { beginAtZero: true } },
+        plugins: { legend: { display: false } }
+      }
+    });
 
-  // Source Files Bar
-  var sfbCtx = document.getElementById('chartSourceFilesBar').getContext('2d');
-  new Chart(sfbCtx, {
-    type: 'bar',
-    data: {
-      labels: srcTotals.map(function(d) { return d.source; }),
-      datasets: [{
-        label: 'Files',
-        data: srcTotals.map(function(d) { return d.files; }),
-        backgroundColor: srcTotals.map(function(d) {
-          return (SOURCE_COLORS[d.source] || COLORS.accent) + 'B0';
-        }),
-        borderRadius: 6
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: true }
+    // Files by Source
+    var sfbCtx = document.getElementById('chartSourceFilesBar').getContext('2d');
+    new Chart(sfbCtx, {
+      type: 'bar',
+      data: {
+        labels: srcTotals.map(function(d) { return d.source; }),
+        datasets: [{
+          label: 'Files', data: srcTotals.map(function(d) { return d.files; }),
+          backgroundColor: srcTotals.map(function(d) { return (SOURCE_COLORS[d.source] || COLORS.accent) + 'B0'; }),
+          borderRadius: 6
+        }]
       },
-      plugins: { legend: { display: false } }
-    }
-  });
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { grid: { display: false } }, y: { beginAtZero: true } },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
 
   // Source Timeline
   var dss = DATA.daily_stats_by_source || [];
-  var allDates = [];
-  var filesBySourceDate = {};
+  var allDates = [], filesBySrc = {};
   for (var i = 0; i < dss.length; i++) {
-    var entry = dss[i];
-    if (allDates.indexOf(entry.date) === -1) allDates.push(entry.date);
-    if (!filesBySourceDate[entry.source]) filesBySourceDate[entry.source] = {};
-    filesBySourceDate[entry.source][entry.date] =
-      (filesBySourceDate[entry.source][entry.date] || 0) + entry.files;
+    if (allDates.indexOf(dss[i].date) === -1) allDates.push(dss[i].date);
+    if (!filesBySrc[dss[i].source]) filesBySrc[dss[i].source] = {};
+    filesBySrc[dss[i].source][dss[i].date] = (filesBySrc[dss[i].source][dss[i].date] || 0) + dss[i].files;
   }
   allDates.sort();
-  var timelineDatasets = [];
-  var srcKeys = Object.keys(filesBySourceDate);
-  for (var s = 0; s < srcKeys.length; s++) {
-    var src = srcKeys[s];
-    timelineDatasets.push({
-      label: src + ' (files)',
-      data: allDates.map(function(dt) { return filesBySourceDate[src][dt] || 0; }),
-      borderColor: SOURCE_COLORS[src] || PALETTE[s % PALETTE.length],
-      backgroundColor: 'transparent',
-      borderWidth: 2,
-      tension: 0.3,
-      pointRadius: allDates.length > 60 ? 0 : 3,
-      pointHoverRadius: 5
+
+  if (allDates.length > 0) {
+    var tlDS = [];
+    var keys = Object.keys(filesBySrc);
+    for (var s = 0; s < keys.length; s++) {
+      tlDS.push({
+        label: keys[s] + ' files',
+        data: allDates.map(function(dt) { return filesBySrc[keys[s]][dt] || 0; }),
+        borderColor: SOURCE_COLORS[keys[s]] || PALETTE[s % PALETTE.length],
+        backgroundColor: 'transparent', borderWidth: 2, tension: 0.3,
+        pointRadius: allDates.length > 60 ? 0 : 3, pointHoverRadius: 5
+      });
+    }
+    var stCtx = document.getElementById('chartSourceTimeline').getContext('2d');
+    new Chart(stCtx, {
+      type: 'line',
+      data: { labels: allDates, datasets: tlDS },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { grid: { display: false } }, y: { beginAtZero: true } },
+        plugins: { legend: { position: 'top' } }
+      }
     });
   }
-  var stCtx = document.getElementById('chartSourceTimeline').getContext('2d');
-  new Chart(stCtx, {
-    type: 'line',
-    data: { labels: allDates, datasets: timelineDatasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: true }
-      },
-      plugins: { legend: { position: 'top' } }
+
+ // ====================== SOURCE SUB TABLE ======================
+  var dsSubs = DATA.daily_stats_top_subs || [];
+  var ssBody = document.querySelector('#sourceSubTable tbody');
+  if (dsSubs.length > 0) {
+    var maxPosts = Math.max.apply(null, dsSubs.map(function(d) { return d.posts; }));
+    var ssHtml = '';
+    for (var i = 0; i < dsSubs.length; i++) {
+      var row = dsSubs[i];
+      var rate = pct(row.files, row.posts);
+      var barW = maxPosts > 0 ? ((row.posts / maxPosts) * 100).toFixed(1) : 0;
+      ssHtml += '<tr>' +
+        '<td>r/' + escapeHtml(row.subreddit) + '</td>' +
+        '<td>' + fmt(row.posts) + '</td>' +
+        '<td>' + fmt(row.files) + '</td>' +
+        '<td><div class="bar-cell"><span>' + rate + '</span>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + barW + '%"></div></div>' +
+        '</div></td></tr>';
     }
+    ssBody.innerHTML = ssHtml;
+  } else {
+    ssBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">No source data available</td></tr>';
+  }
+}
+
+// ====================== TABLES ======================
+function buildTables() {
+  buildSubredditTable();
+  buildDailyTable();
+}
+
+// ====================== SUBREDDIT TABLE ======================
+function buildSubredditTable() {
+  var allSubs = DATA.all_subreddits || [];
+  var tbody = document.querySelector('#subTable tbody');
+  var searchInput = document.getElementById('subSearch');
+  var countSpan = document.getElementById('subCount');
+  var maxCnt = allSubs.length > 0 ? Math.max.apply(null, allSubs.map(function(d) { return d.cnt; })) : 1;
+
+  var sortCol = 1;
+  var sortDir = 'desc';
+
+  function renderRows(data) {
+    var html = '';
+    for (var i = 0; i < data.length; i++) {
+      var row = data[i];
+      var avg = row.cnt > 0 ? (row.dl / row.cnt).toFixed(2) : '0';
+      var barW = maxCnt > 0 ? ((row.cnt / maxCnt) * 100).toFixed(1) : 0;
+      html += '<tr>' +
+        '<td><a href="https://reddit.com/r/' + encodeURIComponent(row.subreddit) +
+        '" target="_blank" rel="noopener" style="color:' + COLORS.blue + ';text-decoration:none">r/' +
+        escapeHtml(row.subreddit) + '</a></td>' +
+        '<td>' + fmt(row.cnt) + '</td>' +
+        '<td>' + fmt(row.dl) + '</td>' +
+        '<td>' + avg + '</td>' +
+        '<td>' + (row.first_seen || '\u2014') + '</td>' +
+        '<td>' + (row.last_seen || '\u2014') + '</td>' +
+        '<td><div class="bar-cell"><div class="bar-track">' +
+        '<div class="bar-fill" style="width:' + barW + '%"></div></div></div></td>' +
+        '</tr>';
+    }
+    tbody.innerHTML = html;
+    countSpan.textContent = data.length + ' of ' + allSubs.length + ' subreddits';
+  }
+
+  function sortData(data, col, dir) {
+    var sorted = data.slice();
+    sorted.sort(function(a, b) {
+      var va, vb;
+      switch (col) {
+        case 0: va = a.subreddit.toLowerCase(); vb = b.subreddit.toLowerCase();
+          return dir === 'asc' ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0);
+        case 1: va = a.cnt; vb = b.cnt; break;
+        case 2: va = a.dl; vb = b.dl; break;
+        case 3: va = a.cnt > 0 ? a.dl / a.cnt : 0; vb = b.cnt > 0 ? b.dl / b.cnt : 0; break;
+        case 4: va = a.first_seen || ''; vb = b.first_seen || '';
+          return dir === 'asc' ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0);
+        case 5: va = a.last_seen || ''; vb = b.last_seen || '';
+          return dir === 'asc' ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0);
+        case 6: va = a.cnt; vb = b.cnt; break;
+        default: va = 0; vb = 0;
+      }
+      return dir === 'asc' ? va - vb : vb - va;
+    });
+    return sorted;
+  }
+
+  function getFiltered() {
+    var q = searchInput.value.toLowerCase().trim();
+    if (!q) return allSubs;
+    return allSubs.filter(function(d) { return d.subreddit.toLowerCase().indexOf(q) !== -1; });
+  }
+
+  function refresh() {
+    var filtered = getFiltered();
+    var sorted = sortData(filtered, sortCol, sortDir);
+    renderRows(sorted);
+  }
+
+  // Sort headers
+  var ths = document.querySelectorAll('#subTable thead th');
+  ths.forEach(function(th) {
+    th.addEventListener('click', function() {
+      var col = parseInt(this.getAttribute('data-col'));
+      if (col === sortCol) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortCol = col;
+        sortDir = 'desc';
+      }
+      ths.forEach(function(t) { t.classList.remove('sorted-asc', 'sorted-desc'); });
+      this.classList.add(sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+      refresh();
+    });
   });
 
-  // Source Sub Table
-  var dsSubs = DATA.daily_stats_top_subs || [];
-  var tbody = document.querySelector('#sourceSubTable tbody');
-  var html = '';
-  for (var i = 0; i < dsSubs.length; i++) {
-    var row = dsSubs[i];
-    var rate = pct(row.files, row.posts);
-    html += '<tr>' +
-      '<td>r/' + row.subreddit + '</td>'
+  // Search
+  searchInput.addEventListener('input', function() { refresh(); });
 
-    </script>
+  // Initial render
+  ths[1].classList.add('sorted-desc');
+  refresh();
+}
+
+// ====================== DAILY TABLE ======================
+function buildDailyTable() {
+  var dailyData = DATA.posts_by_date || [];
+  var tbody = document.querySelector('#dailyTable tbody');
+
+  var sortCol = 0;
+  var sortDir = 'desc';
+
+  // Enrich with download rate
+  var enriched = dailyData.map(function(d) {
+    return {
+      date: d.fetched_date,
+      posts: d.cnt,
+      files: d.dl,
+      rate: d.cnt > 0 ? (d.dl / d.cnt * 100) : 0
+    };
+  });
+
+  var maxPosts = enriched.length > 0 ? Math.max.apply(null, enriched.map(function(d) { return d.posts; })) : 1;
+
+  function renderRows(data) {
+    var html = '';
+    for (var i = 0; i < data.length; i++) {
+      var row = data[i];
+      var barW = maxPosts > 0 ? ((row.posts / maxPosts) * 100).toFixed(1) : 0;
+      html += '<tr>' +
+        '<td>' + row.date + '</td>' +
+        '<td><div class="bar-cell"><span>' + fmt(row.posts) + '</span>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + barW + '%"></div></div>' +
+        '</div></td>' +
+        '<td>' + fmt(row.files) + '</td>' +
+        '<td>' + row.rate.toFixed(1) + '%</td>' +
+        '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  function sortData(data, col, dir) {
+    var sorted = data.slice();
+    sorted.sort(function(a, b) {
+      var va, vb;
+      switch (col) {
+        case 0: va = a.date; vb = b.date;
+          return dir === 'asc' ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0);
+        case 1: va = a.posts; vb = b.posts; break;
+        case 2: va = a.files; vb = b.files; break;
+        case 3: va = a.rate; vb = b.rate; break;
+        default: va = 0; vb = 0;
+      }
+      return dir === 'asc' ? va - vb : vb - va;
+    });
+    return sorted;
+  }
+
+  // Sort headers
+  var ths = document.querySelectorAll('#dailyTable thead th');
+  ths.forEach(function(th) {
+    th.addEventListener('click', function() {
+      var col = parseInt(this.getAttribute('data-col'));
+      if (col === sortCol) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortCol = col;
+        sortDir = 'desc';
+      }
+      ths.forEach(function(t) { t.classList.remove('sorted-asc', 'sorted-desc'); });
+      this.classList.add(sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+      renderRows(sortData(enriched, sortCol, sortDir));
+    });
+  });
+
+  // Initial render (newest first)
+  ths[0].classList.add('sorted-desc');
+  renderRows(sortData(enriched, 0, 'desc'));
+}
+
+// ====================== INIT ======================
+document.addEventListener('DOMContentLoaded', function() {
+  loadData();
+});
+  </script>
 </body>
 </html>
+
