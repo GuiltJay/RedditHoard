@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""export_dashboard_data.py - Export SQLite data to JSON for the GitHub Pages dashboard."""
-
 import sqlite3
 import json
 import os
@@ -8,7 +6,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 DB_FILE = "reddit_stats.db"
-OUTPUT_FILE = "dashboard_data.json"
+OUTPUT_FILE = "./docs/dashboard_data.json"
 
 def export():
     if not os.path.exists(DB_FILE):
