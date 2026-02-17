@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RedditHoard Analytics Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+  :root {
+    --bg: #0e1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #ff4500;
+    --accent2: #ff6534;
+    --blue: #58a6ff;
+    --green: #3fb950;
+    --purple: #bc8cff;
+    --yellow: #d29922;
+    --cyan: #39d2c0;
+    --pink: #f778ba;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .loading-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px;
+    z-index: 9999;
+    transition: opacity 0.5s;
+  }
+  .loading-screen.hidden { opacity: 0; pointer-events: none; }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 4px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  header {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  header .logo { display: flex; align-items: center; gap: 12px; }
+  header .logo svg { width: 36px; height: 36px; }
+  header h1 {
+    font-size: 1.5rem; font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  header .meta { color: var(--text-muted); font-size: 0.85rem; }
+  .container { max-width: 1440px; margin: 0 auto; padding: 24px; }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .kpi-card .value { font-size: 2rem; font-weight: 800; line-height: 1.2; }
+  .kpi-card .label {
+    color: var(--text-muted); font-size: 0.8rem;
+    text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;
+  }
+  .kpi-card.accent .value { color: var(--accent); }
+  .kpi-card.blue .value { color: var(--blue); }
+  .kpi-card.green .value { color: var(--green); }
+  .kpi-card.purple .value { color: var(--purple); }
+  .kpi-card.yellow .value { color: var(--yellow); }
+  .kpi-card.cyan .value { color: var(--cyan); }
+  .section { margin-bottom: 28px; }
+  .section-title {
+    font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .icon { font-size: 1.2rem; }
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 20px; margin-bottom: 28px;
+  }
+  .chart-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; position: relative;
+  }
+  .chart-card h3 {
+    font-size: 0.95rem; font-weight: 600;
+    margin-bottom: 12px; color: var(--text-muted);
+  }
+  .chart-card canvas { max-height: 340px; }
+  .chart-card.full { grid-column: 1 / -1; }
+  .table-wrapper {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .table-controls {
+    padding: 12px 16px; display: flex; align-items: center;
+    gap: 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+  }
+  .table-controls input {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); padding: 8px 14px;
+    font-size: 0.85rem; outline: none; flex: 1; min-width: 180px;
+    transition: border-color 0.2s;
+  }
+  .table-controls input:focus { border-color: var(--accent); }
+  .table-controls .count { color: var(--text-muted); font-size: 0.8rem; }
+  .table-scroll { overflow-x: auto; max-height: 500px; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  thead { position: sticky; top: 0; z-index: 2; }
+  th {
+    background: var(--surface2); padding: 10px 14px; text-align: left;
+    color: var(--text-muted); font-weight: 600; text-transform: uppercase;
+    font-size: 0.75rem; letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  th:hover { color: var(--accent); }
+  th.sorted-asc::after { content: ' ▲'; color: var(--accent); }
+  th.sorted-desc::after { content: ' ▼'; color: var(--accent); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tr:hover td { background: rgba(255, 69, 0, 0.04); }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 600;
+  }
+  .badge-home { background: rgba(88,166,255,0.15); color: var(--blue); }
+  .badge-saved { background: rgba(63,185,80,0.15); color: var(--green); }
+  .badge-sub { background: rgba(188,140,255,0.15); color: var(--purple); }
+  .bar-cell { display: flex; align-items: center; gap: 8px; }
+  .bar-track {
+    flex: 1; height: 6px; background: var(--surface2);
+    border-radius: 3px; overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.6s ease;
+  }
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 8px 18px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface); color: var(--text-muted);
+    font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .tab-btn:hover { border-color: var(--accent); color: var(--text); }
+  .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .heatmap-grid {
+    display: grid; gap: 2px; font-size: 0.7rem;
+  }
+  .heatmap-cell {
+    width: 100%; aspect-ratio: 1; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; cursor: default; transition: transform 0.15s;
+  }
+  .heatmap-cell:hover { transform: scale(1.3); z-index: 10; position: relative; }
+  .heatmap-label {
+    font-size: 0.7rem; color: var(--text-muted);
+    text-align: right; padding-right: 6px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .heatmap-date-label {
+    font-size: 0.6rem; color: var(--text-muted);
+    text-align: center; writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+  footer {
+    text-align: center; padding: 32px; color: var(--text-muted);
+    font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 40px;
+  }
+  @media (max-width: 768px) {
+    .chart-grid { grid-template-columns: 1fr; }
+    header { padding: 16px; }
+    .container { padding: 12px; }
+    .kpi-card .value { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <span style="color:var(--text-muted)">Loading dashboard data…</span>
+</div>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 36 36" fill="none">
+      <circle cx="18" cy="18" r="18" fill="#ff4500"/>
+      <path d="M28 18c0-.8-.4-1.5-1-2a2 2 0 00-3.4-.3A10 10 0 0018 14a10 10 0 00-5.6 1.7 2 2 0 00-3.3.4c-.7.4-1.1 1.1-1.1 2 0 .6.3 1.2.7 1.6a4.4 4.4 0 00-.1 1c0 3.5 4.2 6.3 9.4 6.3s9.4-2.8 9.4-6.3c0-.4 0-.7-.1-1 .4-.4.7-1 .7-1.7z" fill="white"/>
+      <circle cx="14" cy="19" r="1.5" fill="#ff4500"/>
+      <circle cx="22" cy="19" r="1.5" fill="#ff4500"/>
+      <path d="M14.5 23c1 1.2 2.7 1.5 3.5 1.5s2.5-.3 3.5-1.5" stroke="#ff4500" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+    </svg>
+    <h1>RedditHoard Analytics</h1>
+  </div>
+  <div class="meta" id="headerMeta"></div>
+</header>
+
+<div class="container">
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="tabs" id="mainTabs">
+    <button class="tab-btn active" data-tab="overview">📊 Overview</button>
+    <button class="tab-btn" data-tab="temporal">📅 Temporal</button>
+    <button class="tab-btn" data-tab="subreddits">🏷️ Subreddits</button>
+    <button class="tab-btn" data-tab="sources">🔌 Sources</button>
+    <button class="tab-btn" data-tab="tables">📋 Full Data</button>
+  </div>
+
+  <div class="tab-content active" id="tab-overview">
+    <div class="chart-grid">
+      <div class="chart-card full">
+        <h3>📈 Cumulative Posts Over Time</h3>
+        <canvas id="chartCumulative"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>📥 Media Split</h3>
+        <canvas id="chartMediaSplit"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>🔌 Source Distribution</h3>
+        <canvas id="chartSourcePie"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>📊 Download Rate Over Time (%)</h3>
+        <canvas id="chartDlRate"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>📦 Monthly Posts &amp; Downloads</h3>
+        <canvas id="chartMonthly"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-temporal">
+    <div class="chart-grid">
+      <div class="chart-card full">
+        <h3>📅 Daily Posts Fetched &amp; Files Downloaded</h3>
+        <canvas id="chartDaily"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>🕐 Posts by Hour of Day (UTC)</h3>
+        <canvas id="chartHourly"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>📆 Posts by Day of Week</h3>
+        <canvas id="chartDow"></canvas>
+      </div>
+      <div class="chart-card full">
+        <h3>📊 Daily Stats by Source (Stacked)</h3>
+        <canvas id="chartDailySource"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-subreddits">
+    <div class="chart-grid">
+      <div class="chart-card full">
+        <h3>🏆 Top 25 Subreddits by Posts</h3>
+        <canvas id="chartTopSubs"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>📈 Avg Downloads per Post (min 5 posts)</h3>
+        <canvas id="chartAvgDl"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>🔥 Top Subreddits by Files Downloaded</h3>
+        <canvas id="chartSubsByFiles"></canvas>
+      </div>
+      <div class="chart-card full">
+        <h3>🗺️ Subreddit Activity Heatmap (Top 20)</h3>
+        <div id="heatmapContainer" style="overflow-x:auto;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-sources">
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>🔌 Total Posts by Source</h3>
+        <canvas id="chartSourceBar"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>📥 Total Files by Source</h3>
+        <canvas id="chartSourceFilesBar"></canvas>
+      </div>
+      <div class="chart-card full">
+        <h3>📅 Source Breakdown Over Time</h3>
+        <canvas id="chartSourceTimeline"></canvas>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">📊</span> Daily Stats by Source (Top Subreddits)</div>
+      <div class="table-wrapper">
+        <div class="table-scroll">
+          <table id="sourceSubTable">
+            <thead><tr>
+              <th>Subreddit</th><th>Posts Fetched</th>
+              <th>Files Downloaded</th><th>Download Rate</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-tables">
+    <div class="section">
+      <div class="section-title"><span class="icon">🏷️</span> All Subreddits</div>
+      <div class="table-wrapper">
+        <div class="table-controls">
+          <input type="text" id="subSearch" placeholder="Search subreddits…">
+          <span class="count" id="subCount"></span>
+        </div>
+        <div class="table-scroll">
+          <table id="subTable">
+            <thead><tr>
+              <th data-col="0">Subreddit</th><th data-col="1">Posts</th>
+              <th data-col="2">Files Downloaded</th><th data-col="3">Avg DL/Post</th>
+              <th data-col="4">First Seen</th><th data-col="5">Last Seen</th>
+              <th data-col="6">Volume</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="section" style="margin-top:24px">
+      <div class="section-title"><span class="icon">📅</span> Daily Summary</div>
+      <div class="table-wrapper">
+        <div class="table-scroll">
+          <table id="dailyTable">
+            <thead><tr>
+              <th data-col="0">Date</th><th data-col="1">Posts</th>
+              <th data-col="2">Files</th><th data-col="3">DL Rate</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  RedditHoard Analytics Dashboard &middot; Auto-generated from <code>reddit_stats.db</code>
+</footer>
+
+<script>
+// ====================== GLOBALS ======================
+let DATA = {};
+const COLORS = {
+  accent: '#ff4500', accent2: '#ff6534', blue: '#58a6ff',
+  green: '#3fb950', purple: '#bc8cff', yellow: '#d29922',
+  cyan: '#39d2c0', pink: '#f778ba', red: '#f85149'
+};
+const PALETTE = [
+  COLORS.accent, COLORS.blue, COLORS.green, COLORS.purple,
+  COLORS.yellow, COLORS.cyan, COLORS.pink, COLORS.red,
+  '#f0883e', '#a5d6ff', '#7ee787', '#d2a8ff'
+];
+const SOURCE_COLORS = {
+  home: COLORS.blue, saved: COLORS.green, sub: COLORS.purple
+};
+
+Chart.defaults.color = '#8b949e';
+Chart.defaults.borderColor = '#30363d';
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+Chart.defaults.plugins.legend.labels.boxWidth = 14;
+Chart.defaults.plugins.legend.labels.padding = 16;
+Chart.defaults.plugins.tooltip.backgroundColor = '#1c2333';
+Chart.defaults.plugins.tooltip.borderColor = '#30363d';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+Chart.defaults.plugins.tooltip.padding = 10;
+
+// ====================== UTILS ======================
+function fmt(n) { return n == null ? '—' : Number(n).toLocaleString(); }
+function pct(a, b) { return b ? (a / b * 100).toFixed(1) + '%' : '0%'; }
+function pctNum(a, b) { return b ? (a / b * 100) : 0; }
+const DOW_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function makeGradient(ctx, color) {
+  const g = ctx.createLinearGradient(0, 0, 0, 340);
+  g.addColorStop(0, color + '80');
+  g.addColorStop(1, color + '05');
+  return g;
+}
+
+function utcToLocal(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts * 1000);
+  return d.toISOString().split('T')[0];
+}
+
+function colorForIntensity(val, max) {
+  if (val === 0) return '#161b22';
+  const ratio = Math.min(val / Math.max(max, 1), 1);
+  if (ratio < 0.25) return '#0e4429';
+  if (ratio < 0.5) return '#006d32';
+  if (ratio < 0.75) return '#26a641';
+  return '#39d353';
+}
+
+// ====================== DATA LOADING ======================
+async function loadData() {
+  try {
+    const r = await fetch('dashboard_data.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    DATA = await r.json();
+    buildDashboard();
+  } catch (e) {
+    document.getElementById('loading').innerHTML =
+      '<div style="color:#f85149;text-align:center;padding:40px">' +
+      '<h2 style="margin-bottom:12px">⚠️ Failed to Load Data</h2>' +
+      '<p style="color:#8b949e">Could not load <code>dashboard_data.json</code></p>' +
+      '<p style="color:#8b949e;margin-top:8px">Run <code>python export_dashboard_data.py</code> first.</p>' +
+      '<p style="color:#f85149;margin-top:12px;font-size:0.8rem">' + e.message + '</p>' +
+      '</div>';
+  }
+}
+
+// ====================== BUILD DASHBOARD ======================
+function buildDashboard() {
+  buildKPIs();
+  buildTabs();
+  buildOverviewCharts();
+  buildTemporalCharts();
+  buildSubredditCharts();
+  buildSourceCharts();
+  buildTables();
+  buildHeatmap();
+
+  // Header meta
+  const meta = document.getElementById('headerMeta');
+  const parts = [];
+  if (DATA.first_fetch_date) parts.push('Since ' + DATA.first_fetch_date);
+  if (DATA.last_fetch_date) parts.push('Last run ' + DATA.last_fetch_date);
+  meta.textContent = parts.join(' · ');
+
+  // Hide loading
+  setTimeout(function() {
+    document.getElementById('loading').classList.add('hidden');
+    setTimeout(function() {
+      document.getElementById('loading').style.display = 'none';
+    }, 500);
+  }, 300);
+}
+
+// ====================== KPI CARDS ======================
+function buildKPIs() {
+  var grid = document.getElementById('kpiGrid');
+  var avgDl = DATA.total_posts > 0 ? (DATA.total_files_downloaded / DATA.total_posts).toFixed(2) : '0';
+  var dlRate = DATA.total_posts > 0
+    ? ((DATA.media_split.with_media / DATA.total_posts) * 100).toFixed(1) + '%'
+    : '0%';
+  var postsPerDay = DATA.total_active_days > 0
+    ? Math.round(DATA.total_posts / DATA.total_active_days)
+    : 0;
+
+  var cards = [
+    { value: fmt(DATA.total_posts), label: 'Total Posts', cls: 'accent' },
+    { value: fmt(DATA.total_files_downloaded), label: 'Files Downloaded', cls: 'green' },
+    { value: fmt(DATA.total_subreddits), label: 'Subreddits', cls: 'blue' },
+    { value: fmt(DATA.total_active_days), label: 'Active Days', cls: 'purple' },
+    { value: dlRate, label: 'Media Hit Rate', cls: 'yellow' },
+    { value: avgDl, label: 'Avg Files / Post', cls: 'cyan' },
+    { value: fmt(postsPerDay), label: 'Posts / Day', cls: 'accent' },
+    { value: fmt(DATA.media_split.with_media), label: 'Posts with Media', cls: 'green' }
+  ];
+
+  var html = '';
+  for (var i = 0; i < cards.length; i++) {
+    html += '<div class="kpi-card ' + cards[i].cls + '">' +
+      '<div class="value">' + cards[i].value + '</div>' +
+      '<div class="label">' + cards[i].label + '</div>' +
+      '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+// ====================== TABS ======================
+function buildTabs() {
+  var btns = document.querySelectorAll('.tab-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].addEventListener('click', function() {
+      var target = this.getAttribute('data-tab');
+      var allBtns = document.querySelectorAll('.tab-btn');
+      var allTabs = document.querySelectorAll('.tab-content');
+      for (var j = 0; j < allBtns.length; j++) allBtns[j].classList.remove('active');
+      for (var j = 0; j < allTabs.length; j++) allTabs[j].classList.remove('active');
+      this.classList.add('active');
+      document.getElementById('tab-' + target).classList.add('active');
+    });
+  }
+}
+
+// ====================== OVERVIEW CHARTS ======================
+function buildOverviewCharts() {
+  // Cumulative Posts
+  var cumData = DATA.cumulative_posts || [];
+  var cumCtx = document.getElementById('chartCumulative').getContext('2d');
+  new Chart(cumCtx, {
+    type: 'line',
+    data: {
+      labels: cumData.map(function(d) { return d.fetched_date; }),
+      datasets: [{
+        label: 'Cumulative Posts',
+        data: cumData.map(function(d) { return d.cumulative; }),
+        borderColor: COLORS.accent,
+        backgroundColor: makeGradient(cumCtx, COLORS.accent),
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3,
+        pointRadius: cumData.length > 60 ? 0 : 3,
+        pointHoverRadius: 5,
+        pointBackgroundColor: COLORS.accent
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // Media Split Doughnut
+  var msCtx = document.getElementById('chartMediaSplit').getContext('2d');
+  new Chart(msCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['With Media', 'Without Media'],
+      datasets: [{
+        data: [DATA.media_split.with_media, DATA.media_split.without_media],
+        backgroundColor: [COLORS.green, COLORS.red + '60'],
+        borderColor: ['transparent', 'transparent'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '65%',
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+              return ctx.label + ': ' + fmt(ctx.raw) + ' (' + pct(ctx.raw, total) + ')';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Source Distribution Pie
+  var srcTotals = DATA.source_totals || [];
+  var spCtx = document.getElementById('chartSourcePie').getContext('2d');
+  new Chart(spCtx, {
+    type: 'doughnut',
+    data: {
+      labels: srcTotals.map(function(d) { return d.source; }),
+      datasets: [{
+        data: srcTotals.map(function(d) { return d.posts; }),
+        backgroundColor: srcTotals.map(function(d) {
+          return SOURCE_COLORS[d.source] || COLORS.accent;
+        }),
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '65%',
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+              return ctx.label + ': ' + fmt(ctx.raw) + ' posts (' + pct(ctx.raw, total) + ')';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Download Rate Line
+  var dlRate = DATA.download_rate_by_date || [];
+  var drCtx = document.getElementById('chartDlRate').getContext('2d');
+  new Chart(drCtx, {
+    type: 'line',
+    data: {
+      labels: dlRate.map(function(d) { return d.fetched_date; }),
+      datasets: [{
+        label: 'DL Rate %',
+        data: dlRate.map(function(d) { return pctNum(d.with_dl, d.total); }),
+        borderColor: COLORS.yellow,
+        backgroundColor: makeGradient(drCtx, COLORS.yellow),
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3,
+        pointRadius: dlRate.length > 60 ? 0 : 3,
+        pointHoverRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, max: 100, ticks: { callback: function(v) { return v + '%'; } } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.parsed.y.toFixed(1) + '%'; }
+          }
+        }
+      }
+    }
+  });
+
+  // Monthly Bar
+  var monthly = DATA.posts_by_month || [];
+  var moCtx = document.getElementById('chartMonthly').getContext('2d');
+  new Chart(moCtx, {
+    type: 'bar',
+    data: {
+      labels: monthly.map(function(d) { return d.month; }),
+      datasets: [
+        {
+          label: 'Posts',
+          data: monthly.map(function(d) { return d.cnt; }),
+          backgroundColor: COLORS.blue + 'B0',
+          borderRadius: 4
+        },
+        {
+          label: 'Downloads',
+          data: monthly.map(function(d) { return d.dl; }),
+          backgroundColor: COLORS.green + 'B0',
+          borderRadius: 4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true }
+      },
+      plugins: { legend: { position: 'top' } }
+    }
+  });
+}
+
+// ====================== TEMPORAL CHARTS ======================
+function buildTemporalCharts() {
+  // Daily Posts & Files
+  var daily = DATA.posts_by_date || [];
+  var ddCtx = document.getElementById('chartDaily').getContext('2d');
+  new Chart(ddCtx, {
+    type: 'bar',
+    data: {
+      labels: daily.map(function(d) { return d.fetched_date; }),
+      datasets: [
+        {
+          label: 'Posts Fetched',
+          data: daily.map(function(d) { return d.cnt; }),
+          backgroundColor: COLORS.blue + 'B0',
+          borderRadius: 3,
+          order: 2
+        },
+        {
+          label: 'Files Downloaded',
+          data: daily.map(function(d) { return d.dl; }),
+          type: 'line',
+          borderColor: COLORS.green,
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          tension: 0.3,
+          pointRadius: daily.length > 60 ? 0 : 3,
+          pointHoverRadius: 5,
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true }
+      },
+      plugins: { legend: { position: 'top' } }
+    }
+  });
+
+  // Hourly
+  var hourly = DATA.posts_by_hour || [];
+  var hourLabels = [];
+  var hourValues = [];
+  for (var h = 0; h < 24; h++) {
+    hourLabels.push(h.toString().padStart(2, '0') + ':00');
+    var found = hourly.find(function(d) { return d.hour === h; });
+    hourValues.push(found ? found.cnt : 0);
+  }
+  var hCtx = document.getElementById('chartHourly').getContext('2d');
+  new Chart(hCtx, {
+    type: 'bar',
+    data: {
+      labels: hourLabels,
+      datasets: [{
+        label: 'Posts',
+        data: hourValues,
+        backgroundColor: hourValues.map(function(v, i) {
+          return (i >= 6 && i <= 18) ? COLORS.yellow + 'B0' : COLORS.purple + 'B0';
+        }),
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // Day of Week
+  var dow = DATA.posts_by_dow || [];
+  var dowValues = [];
+  for (var d = 0; d < 7; d++) {
+    var found = dow.find(function(item) { return item.dow === d; });
+    dowValues.push(found ? found.cnt : 0);
+  }
+  var dwCtx = document.getElementById('chartDow').getContext('2d');
+  new Chart(dwCtx, {
+    type: 'polarArea',
+    data: {
+      labels: DOW_NAMES,
+      datasets: [{
+        data: dowValues,
+        backgroundColor: [
+          COLORS.red + '80', COLORS.blue + '80', COLORS.green + '80',
+          COLORS.purple + '80', COLORS.yellow + '80', COLORS.cyan + '80',
+          COLORS.pink + '80'
+        ],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { r: { beginAtZero: true, grid: { color: '#30363d' } } },
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  // Daily Stats by Source (Stacked)
+  var dss = DATA.daily_stats_by_source || [];
+  var allDates = [];
+  var sourceMap = {};
+  for (var i = 0; i < dss.length; i++) {
+    var entry = dss[i];
+    if (allDates.indexOf(entry.date) === -1) allDates.push(entry.date);
+    if (!sourceMap[entry.source]) sourceMap[entry.source] = {};
+    sourceMap[entry.source][entry.date] = (sourceMap[entry.source][entry.date] || 0) + entry.posts;
+  }
+  allDates.sort();
+  var stackedDatasets = [];
+  var srcKeys = Object.keys(sourceMap);
+  for (var s = 0; s < srcKeys.length; s++) {
+    var src = srcKeys[s];
+    stackedDatasets.push({
+      label: src,
+      data: allDates.map(function(dt) { return sourceMap[src][dt] || 0; }),
+      backgroundColor: (SOURCE_COLORS[src] || PALETTE[s % PALETTE.length]) + 'B0',
+      borderRadius: 2
+    });
+  }
+  var dsCtx = document.getElementById('chartDailySource').getContext('2d');
+  new Chart(dsCtx, {
+    type: 'bar',
+    data: { labels: allDates, datasets: stackedDatasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { stacked: true, grid: { display: false } },
+        y: { stacked: true, beginAtZero: true }
+      },
+      plugins: { legend: { position: 'top' } }
+    }
+  });
+}
+
+// ====================== SUBREDDIT CHARTS ======================
+function buildSubredditCharts() {
+  // Top 25 Subreddits by Posts (horizontal bar)
+  var topSubs = (DATA.top_subreddits || []).slice(0, 25);
+  var tsCtx = document.getElementById('chartTopSubs').getContext('2d');
+  new Chart(tsCtx, {
+    type: 'bar',
+    data: {
+      labels: topSubs.map(function(d) { return 'r/' + d.subreddit; }),
+      datasets: [
+        {
+          label: 'Posts',
+          data: topSubs.map(function(d) { return d.cnt; }),
+          backgroundColor: COLORS.accent + 'B0',
+          borderRadius: 3
+        },
+        {
+          label: 'Downloads',
+          data: topSubs.map(function(d) { return d.dl; }),
+          backgroundColor: COLORS.green + 'B0',
+          borderRadius: 3
+        }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { beginAtZero: true },
+        y: { grid: { display: false } }
+      },
+      plugins: { legend: { position: 'top' } }
+    }
+  });
+
+  // Avg Downloads per Post
+  var avgDl = (DATA.avg_downloads_per_sub || []).slice(0, 20);
+  var adCtx = document.getElementById('chartAvgDl').getContext('2d');
+  new Chart(adCtx, {
+    type: 'bar',
+    data: {
+      labels: avgDl.map(function(d) { return 'r/' + d.subreddit; }),
+      datasets: [{
+        label: 'Avg DL/Post',
+        data: avgDl.map(function(d) { return d.avg_dl; }),
+        backgroundColor: avgDl.map(function(_, i) {
+          return PALETTE[i % PALETTE.length] + 'B0';
+        }),
+        borderRadius: 3
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { beginAtZero: true },
+        y: { grid: { display: false } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // Top Subs by Files Downloaded
+  var subsByFiles = (DATA.top_subreddits || [])
+    .slice()
+    .sort(function(a, b) { return b.dl - a.dl; })
+    .slice(0, 20);
+  var sfCtx = document.getElementById('chartSubsByFiles').getContext('2d');
+  new Chart(sfCtx, {
+    type: 'bar',
+    data: {
+      labels: subsByFiles.map(function(d) { return 'r/' + d.subreddit; }),
+      datasets: [{
+        label: 'Files Downloaded',
+        data: subsByFiles.map(function(d) { return d.dl; }),
+        backgroundColor: subsByFiles.map(function(_, i) {
+          return PALETTE[i % PALETTE.length] + 'B0';
+        }),
+        borderRadius: 3
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { beginAtZero: true },
+        y: { grid: { display: false } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+// ====================== HEATMAP ======================
+function buildHeatmap() {
+  var hmData = DATA.subreddit_heatmap || [];
+  if (hmData.length === 0) {
+    document.getElementById('heatmapContainer').innerHTML =
+      '<p style="color:var(--text-muted);padding:20px;text-align:center">No heatmap data available</p>';
+    return;
+  }
+
+  // Collect unique subs and dates
+  var subsSet = {};
+  var datesSet = {};
+  var maxVal = 0;
+  var lookup = {};
+  for (var i = 0; i < hmData.length; i++) {
+    var item = hmData[i];
+    subsSet[item.subreddit] = true;
+    datesSet[item.date] = true;
+    var key = item.subreddit + '|' + item.date;
+    lookup[key] = item.count;
+    if (item.count > maxVal) maxVal = item.count;
+  }
+
+  var subs = Object.keys(subsSet);
+  var dates = Object.keys(datesSet).sort();
+
+  // Build HTML table-style heatmap
+  var html = '<table style="border-collapse:collapse;font-size:0.75rem;width:100%">';
+
+  // Header row with dates
+  html += '<tr><th style="padding:4px 8px;text-align:right;color:var(--text-muted);min-width:120px"></th>';
+  for (var d = 0; d < dates.length; d++) {
+    var shortDate = dates[d].substring(5); // MM-DD
+    html += '<th style="padding:4px 2px;color:var(--text-muted);font-weight:400;font-size:0.6rem;' +
+      'writing-mode:vertical-rl;transform:rotate(180deg);text-align:left;min-width:24px">' +
+      shortDate + '</th>';
+  }
+  html += '</tr>';
+
+  // Data rows
+  for (var s = 0; s < subs.length; s++) {
+    html += '<tr><td style="padding:4px 8px;text-align:right;color:var(--text-muted);' +
+      'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;font-size:0.75rem">' +
+      'r/' + subs[s] + '</td>';
+    for (var d = 0; d < dates.length; d++) {
+      var key = subs[s] + '|' + dates[d];
+      var val = lookup[key] || 0;
+      var bg = colorForIntensity(val, maxVal);
+      var title = 'r/' + subs[s] + ' on ' + dates[d] + ': ' + val + ' posts';
+      html += '<td style="padding:2px;"><div style="width:20px;height:20px;border-radius:3px;' +
+        'background:' + bg + ';display:flex;align-items:center;justify-content:center;' +
+        'font-size:0.6rem;color:' + (val > 0 ? '#e6edf3' : 'transparent') + ';cursor:default" ' +
+        'title="' + title + '">' + (val > 0 ? val : '') + '</div></td>';
+    }
+    html += '</tr>';
+  }
+
+  html += '</table>';
+
+  // Legend
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:0 8px">' +
+    '<span style="color:var(--text-muted);font-size:0.7rem">Less</span>';
+  var legendColors = ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'];
+  for (var l = 0; l < legendColors.length; l++) {
+    html += '<div style="width:16px;height:16px;border-radius:3px;background:' +
+      legendColors[l] + '"></div>';
+  }
+  html += '<span style="color:var(--text-muted);font-size:0.7rem">More</span></div>';
+
+  document.getElementById('heatmapContainer').innerHTML = html;
+}
+
+// ====================== SOURCE CHARTS ======================
+function buildSourceCharts() {
+  var srcTotals = DATA.source_totals || [];
+
+  // Source Posts Bar
+  var sbCtx = document.getElementById('chartSourceBar').getContext('2d');
+  new Chart(sbCtx, {
+    type: 'bar',
+    data: {
+      labels: srcTotals.map(function(d) { return d.source; }),
+      datasets: [{
+        label: 'Posts',
+        data: srcTotals.map(function(d) { return d.posts; }),
+        backgroundColor: srcTotals.map(function(d) {
+          return (SOURCE_COLORS[d.source] || COLORS.accent) + 'B0';
+        }),
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // Source Files Bar
+  var sfbCtx = document.getElementById('chartSourceFilesBar').getContext('2d');
+  new Chart(sfbCtx, {
+    type: 'bar',
+    data: {
+      labels: srcTotals.map(function(d) { return d.source; }),
+      datasets: [{
+        label: 'Files',
+        data: srcTotals.map(function(d) { return d.files; }),
+        backgroundColor: srcTotals.map(function(d) {
+          return (SOURCE_COLORS[d.source] || COLORS.accent) + 'B0';
+        }),
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // Source Timeline
+  var dss = DATA.daily_stats_by_source || [];
+  var allDates = [];
+  var filesBySourceDate = {};
+  for (var i = 0; i < dss.length; i++) {
+    var entry = dss[i];
+    if (allDates.indexOf(entry.date) === -1) allDates.push(entry.date);
+    if (!filesBySourceDate[entry.source]) filesBySourceDate[entry.source] = {};
+    filesBySourceDate[entry.source][entry.date] =
+      (filesBySourceDate[entry.source][entry.date] || 0) + entry.files;
+  }
+  allDates.sort();
+  var timelineDatasets = [];
+  var srcKeys = Object.keys(filesBySourceDate);
+  for (var s = 0; s < srcKeys.length; s++) {
+    var src = srcKeys[s];
+    timelineDatasets.push({
+      label: src + ' (files)',
+      data: allDates.map(function(dt) { return filesBySourceDate[src][dt] || 0; }),
+      borderColor: SOURCE_COLORS[src] || PALETTE[s % PALETTE.length],
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: allDates.length > 60 ? 0 : 3,
+      pointHoverRadius: 5
+    });
+  }
+  var stCtx = document.getElementById('chartSourceTimeline').getContext('2d');
+  new Chart(stCtx, {
+    type: 'line',
+    data: { labels: allDates, datasets: timelineDatasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true }
+      },
+      plugins: { legend: { position: 'top' } }
+    }
+  });
+
+  // Source Sub Table
+  var dsSubs = DATA.daily_stats_top_subs || [];
+  var tbody = document.querySelector('#sourceSubTable tbody');
+  var html = '';
+  for (var i = 0; i < dsSubs.length; i++) {
+    var row = dsSubs[i];
+    var rate = pct(row.files, row.posts);
+    html += '<tr>' +
+      '<td>r/' + row.subreddit + '</td>'
+
+    </script>
+</body>
+</html>
