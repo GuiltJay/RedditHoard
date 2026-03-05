@@ -1,12 +1,12 @@
 {
-  "total_posts": 3001,
-  "total_files_downloaded": 3156,
-  "total_subreddits": 356,
-  "total_active_days": 15,
+  "total_posts": 3201,
+  "total_files_downloaded": 3489,
+  "total_subreddits": 365,
+  "total_active_days": 16,
   "first_fetch_date": "2026-02-18",
-  "last_fetch_date": "2026-03-04",
+  "last_fetch_date": "2026-03-05",
   "oldest_post_utc": 1771382215,
-  "newest_post_utc": 1772608185,
+  "newest_post_utc": 1772694796,
   "posts_by_date": [
     {
       "fetched_date": "2026-02-18",
@@ -82,6 +82,11 @@
       "fetched_date": "2026-03-04",
       "cnt": 200,
       "dl": 198
+    },
+    {
+      "fetched_date": "2026-03-05",
+      "cnt": 200,
+      "dl": 333
     }
   ],
   "top_subreddits": [
@@ -92,13 +97,18 @@
     },
     {
       "subreddit": "GOONED",
-      "cnt": 186,
-      "dl": 646
+      "cnt": 237,
+      "dl": 857
     },
     {
       "subreddit": "chubby",
       "cnt": 68,
       "dl": 57
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "cnt": 64,
+      "dl": 48
     },
     {
       "subreddit": "smallboobs",
@@ -111,9 +121,9 @@
       "dl": 48
     },
     {
-      "subreddit": "KochiNSFW",
-      "cnt": 58,
-      "dl": 45
+      "subreddit": "SluttyConfessions",
+      "cnt": 57,
+      "dl": 0
     },
     {
       "subreddit": "gonewild",
@@ -121,19 +131,14 @@
       "dl": 80
     },
     {
-      "subreddit": "SluttyConfessions",
-      "cnt": 50,
-      "dl": 0
+      "subreddit": "NudeNonNude",
+      "cnt": 49,
+      "dl": 97
     },
     {
       "subreddit": "AmIFuckWorthy",
       "cnt": 43,
       "dl": 52
-    },
-    {
-      "subreddit": "NudeNonNude",
-      "cnt": 42,
-      "dl": 84
     },
     {
       "subreddit": "ButtsAndBareFeet",
@@ -142,7 +147,7 @@
     },
     {
       "subreddit": "TittyDrop",
-      "cnt": 33,
+      "cnt": 36,
       "dl": 0
     },
     {
@@ -151,19 +156,34 @@
       "dl": 30
     },
     {
+      "subreddit": "GirlsGW",
+      "cnt": 30,
+      "dl": 15
+    },
+    {
+      "subreddit": "tiktoknsfw",
+      "cnt": 29,
+      "dl": 3
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "cnt": 29,
+      "dl": 36
+    },
+    {
       "subreddit": "ThickThighs",
       "cnt": 29,
       "dl": 54
     },
     {
+      "subreddit": "Pune_fwb_",
+      "cnt": 29,
+      "dl": 25
+    },
+    {
       "subreddit": "ChavsGalore",
       "cnt": 29,
       "dl": 97
-    },
-    {
-      "subreddit": "GirlsGW",
-      "cnt": 28,
-      "dl": 14
     },
     {
       "subreddit": "DesiNSFWSubs",
@@ -176,14 +196,9 @@
       "dl": 15
     },
     {
-      "subreddit": "tiktoknsfw",
-      "cnt": 27,
-      "dl": 3
-    },
-    {
-      "subreddit": "ratemyboobs",
-      "cnt": 25,
-      "dl": 31
+      "subreddit": "GymGirlsNSFW",
+      "cnt": 26,
+      "dl": 35
     },
     {
       "subreddit": "amihot",
@@ -191,19 +206,29 @@
       "dl": 24
     },
     {
-      "subreddit": "Pune_fwb_",
+      "subreddit": "FuckToyFactory",
       "cnt": 25,
-      "dl": 21
+      "dl": 30
+    },
+    {
+      "subreddit": "girlsmasturbating",
+      "cnt": 24,
+      "dl": 3
+    },
+    {
+      "subreddit": "Pussy_Perfection",
+      "cnt": 24,
+      "dl": 10
+    },
+    {
+      "subreddit": "HotWetPussy",
+      "cnt": 24,
+      "dl": 5
     },
     {
       "subreddit": "naturaltitties",
       "cnt": 23,
       "dl": 14
-    },
-    {
-      "subreddit": "girlsmasturbating",
-      "cnt": 23,
-      "dl": 3
     },
     {
       "subreddit": "YoungSlutsForOlderMen",
@@ -216,19 +241,9 @@
       "dl": 36
     },
     {
-      "subreddit": "GymGirlsNSFW",
-      "cnt": 21,
-      "dl": 28
-    },
-    {
-      "subreddit": "FuckToyFactory",
-      "cnt": 21,
-      "dl": 28
-    },
-    {
-      "subreddit": "Pussy_Perfection",
-      "cnt": 20,
-      "dl": 9
+      "subreddit": "AdorableNudes",
+      "cnt": 22,
+      "dl": 13
     },
     {
       "subreddit": "Normalnudesgonewild",
@@ -239,11 +254,6 @@
       "subreddit": "Mumbai_GW",
       "cnt": 20,
       "dl": 21
-    },
-    {
-      "subreddit": "HotWetPussy",
-      "cnt": 20,
-      "dl": 4
     },
     {
       "subreddit": "tipofmypenis",
@@ -261,14 +271,14 @@
       "dl": 27
     },
     {
+      "subreddit": "aa_cups",
+      "cnt": 18,
+      "dl": 7
+    },
+    {
       "subreddit": "RealHomePorn",
       "cnt": 18,
       "dl": 0
-    },
-    {
-      "subreddit": "aa_cups",
-      "cnt": 17,
-      "dl": 6
     },
     {
       "subreddit": "The_Best_NSFW_GIFS",
@@ -286,14 +296,14 @@
       "dl": 7
     },
     {
+      "subreddit": "NudeGirlsHub",
+      "cnt": 17,
+      "dl": 10
+    },
+    {
       "subreddit": "Adorable_Nudes",
       "cnt": 17,
       "dl": 24
-    },
-    {
-      "subreddit": "AdorableNudes",
-      "cnt": 17,
-      "dl": 11
     },
     {
       "subreddit": "collegesluts",
@@ -329,11 +339,6 @@
       "subreddit": "BBW",
       "cnt": 15,
       "dl": 22
-    },
-    {
-      "subreddit": "AnalGW",
-      "cnt": 15,
-      "dl": 5
     }
   ],
   "all_subreddits": [
@@ -346,10 +351,10 @@
     },
     {
       "subreddit": "GOONED",
-      "cnt": 186,
-      "dl": 646,
+      "cnt": 237,
+      "dl": 857,
       "first_seen": "2026-02-19",
-      "last_seen": "2026-03-03"
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "chubby",
@@ -357,6 +362,13 @@
       "dl": 57,
       "first_seen": "2026-02-20",
       "last_seen": "2026-03-04"
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "cnt": 64,
+      "dl": 48,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "smallboobs",
@@ -373,11 +385,11 @@
       "last_seen": "2026-03-02"
     },
     {
-      "subreddit": "KochiNSFW",
-      "cnt": 58,
-      "dl": 45,
+      "subreddit": "SluttyConfessions",
+      "cnt": 57,
+      "dl": 0,
       "first_seen": "2026-02-18",
-      "last_seen": "2026-03-04"
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "gonewild",
@@ -387,11 +399,11 @@
       "last_seen": "2026-03-02"
     },
     {
-      "subreddit": "SluttyConfessions",
-      "cnt": 50,
-      "dl": 0,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-03-03"
+      "subreddit": "NudeNonNude",
+      "cnt": 49,
+      "dl": 97,
+      "first_seen": "2026-02-21",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "AmIFuckWorthy",
@@ -399,13 +411,6 @@
       "dl": 52,
       "first_seen": "2026-02-19",
       "last_seen": "2026-03-02"
-    },
-    {
-      "subreddit": "NudeNonNude",
-      "cnt": 42,
-      "dl": 84,
-      "first_seen": "2026-02-21",
-      "last_seen": "2026-03-01"
     },
     {
       "subreddit": "ButtsAndBareFeet",
@@ -416,10 +421,10 @@
     },
     {
       "subreddit": "TittyDrop",
-      "cnt": 33,
+      "cnt": 36,
       "dl": 0,
       "first_seen": "2026-02-18",
-      "last_seen": "2026-03-04"
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "SexyButClothed",
@@ -429,6 +434,27 @@
       "last_seen": "2026-03-04"
     },
     {
+      "subreddit": "GirlsGW",
+      "cnt": 30,
+      "dl": 15,
+      "first_seen": "2026-02-21",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "tiktoknsfw",
+      "cnt": 29,
+      "dl": 3,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "cnt": 29,
+      "dl": 36,
+      "first_seen": "2026-02-22",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "ThickThighs",
       "cnt": 29,
       "dl": 54,
@@ -436,18 +462,18 @@
       "last_seen": "2026-02-28"
     },
     {
+      "subreddit": "Pune_fwb_",
+      "cnt": 29,
+      "dl": 25,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "ChavsGalore",
       "cnt": 29,
       "dl": 97,
       "first_seen": "2026-02-19",
       "last_seen": "2026-03-04"
-    },
-    {
-      "subreddit": "GirlsGW",
-      "cnt": 28,
-      "dl": 14,
-      "first_seen": "2026-02-21",
-      "last_seen": "2026-03-03"
     },
     {
       "subreddit": "DesiNSFWSubs",
@@ -464,18 +490,11 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "tiktoknsfw",
-      "cnt": 27,
-      "dl": 3,
+      "subreddit": "GymGirlsNSFW",
+      "cnt": 26,
+      "dl": 35,
       "first_seen": "2026-02-18",
-      "last_seen": "2026-03-04"
-    },
-    {
-      "subreddit": "ratemyboobs",
-      "cnt": 25,
-      "dl": 31,
-      "first_seen": "2026-02-22",
-      "last_seen": "2026-03-04"
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "amihot",
@@ -485,11 +504,32 @@
       "last_seen": "2026-03-03"
     },
     {
-      "subreddit": "Pune_fwb_",
+      "subreddit": "FuckToyFactory",
       "cnt": 25,
-      "dl": 21,
+      "dl": 30,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "girlsmasturbating",
+      "cnt": 24,
+      "dl": 3,
       "first_seen": "2026-02-19",
-      "last_seen": "2026-02-25"
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "Pussy_Perfection",
+      "cnt": 24,
+      "dl": 10,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "HotWetPussy",
+      "cnt": 24,
+      "dl": 5,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "naturaltitties",
@@ -497,13 +537,6 @@
       "dl": 14,
       "first_seen": "2026-02-18",
       "last_seen": "2026-03-02"
-    },
-    {
-      "subreddit": "girlsmasturbating",
-      "cnt": 23,
-      "dl": 3,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-03-04"
     },
     {
       "subreddit": "YoungSlutsForOlderMen",
@@ -520,25 +553,11 @@
       "last_seen": "2026-03-01"
     },
     {
-      "subreddit": "GymGirlsNSFW",
-      "cnt": 21,
-      "dl": 28,
+      "subreddit": "AdorableNudes",
+      "cnt": 22,
+      "dl": 13,
       "first_seen": "2026-02-18",
-      "last_seen": "2026-03-04"
-    },
-    {
-      "subreddit": "FuckToyFactory",
-      "cnt": 21,
-      "dl": 28,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-02-27"
-    },
-    {
-      "subreddit": "Pussy_Perfection",
-      "cnt": 20,
-      "dl": 9,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-03-01"
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "Normalnudesgonewild",
@@ -553,13 +572,6 @@
       "dl": 21,
       "first_seen": "2026-02-20",
       "last_seen": "2026-03-03"
-    },
-    {
-      "subreddit": "HotWetPussy",
-      "cnt": 20,
-      "dl": 4,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-03-01"
     },
     {
       "subreddit": "tipofmypenis",
@@ -583,18 +595,18 @@
       "last_seen": "2026-02-27"
     },
     {
+      "subreddit": "aa_cups",
+      "cnt": 18,
+      "dl": 7,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "RealHomePorn",
       "cnt": 18,
       "dl": 0,
       "first_seen": "2026-02-19",
       "last_seen": "2026-03-02"
-    },
-    {
-      "subreddit": "aa_cups",
-      "cnt": 17,
-      "dl": 6,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-03-04"
     },
     {
       "subreddit": "The_Best_NSFW_GIFS",
@@ -618,18 +630,18 @@
       "last_seen": "2026-02-27"
     },
     {
+      "subreddit": "NudeGirlsHub",
+      "cnt": 17,
+      "dl": 10,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "Adorable_Nudes",
       "cnt": 17,
       "dl": 24,
       "first_seen": "2026-02-21",
       "last_seen": "2026-03-04"
-    },
-    {
-      "subreddit": "AdorableNudes",
-      "cnt": 17,
-      "dl": 11,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-03-01"
     },
     {
       "subreddit": "collegesluts",
@@ -688,11 +700,18 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "NudeGirlsHub",
+      "subreddit": "trivandrum_GoneWild",
       "cnt": 14,
       "dl": 9,
-      "first_seen": "2026-02-20",
-      "last_seen": "2026-02-28"
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "BrownHotties",
+      "cnt": 14,
+      "dl": 18,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "BrownGirls_",
@@ -700,6 +719,13 @@
       "dl": 11,
       "first_seen": "2026-02-18",
       "last_seen": "2026-03-04"
+    },
+    {
+      "subreddit": "SheDoesTheWork",
+      "cnt": 13,
+      "dl": 0,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "RoughPorn",
@@ -723,6 +749,13 @@
       "last_seen": "2026-03-04"
     },
     {
+      "subreddit": "FitNakedGirls",
+      "cnt": 13,
+      "dl": 9,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "CandaulismViews",
       "cnt": 13,
       "dl": 20,
@@ -730,11 +763,11 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "BrownHotties",
+      "subreddit": "BDSMGW",
       "cnt": 13,
-      "dl": 16,
+      "dl": 10,
       "first_seen": "2026-02-19",
-      "last_seen": "2026-02-28"
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "3Porn_Edits",
@@ -744,18 +777,18 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "trivandrum_GoneWild",
-      "cnt": 12,
-      "dl": 8,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-03-04"
-    },
-    {
       "subreddit": "bigtiddygothgf",
       "cnt": 12,
       "dl": 17,
       "first_seen": "2026-02-20",
       "last_seen": "2026-03-03"
+    },
+    {
+      "subreddit": "ThickSloppyCreamy",
+      "cnt": 12,
+      "dl": 12,
+      "first_seen": "2026-02-22",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "SoCalLatina",
@@ -770,13 +803,6 @@
       "dl": 8,
       "first_seen": "2026-02-19",
       "last_seen": "2026-03-02"
-    },
-    {
-      "subreddit": "SheDoesTheWork",
-      "cnt": 12,
-      "dl": 0,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-03-04"
     },
     {
       "subreddit": "PetiteGoneWild",
@@ -800,11 +826,25 @@
       "last_seen": "2026-03-01"
     },
     {
-      "subreddit": "BDSMGW",
+      "subreddit": "BBCparadise",
       "cnt": 12,
-      "dl": 10,
+      "dl": 12,
+      "first_seen": "2026-02-21",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "rule34",
+      "cnt": 11,
+      "dl": 13,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "lingeriewomen",
+      "cnt": 11,
+      "dl": 20,
       "first_seen": "2026-02-19",
-      "last_seen": "2026-03-01"
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "asiangirlsforwhitemen",
@@ -814,11 +854,25 @@
       "last_seen": "2026-03-02"
     },
     {
+      "subreddit": "anal_gifs",
+      "cnt": 11,
+      "dl": 0,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "RedGIFsAmateur",
       "cnt": 11,
       "dl": 0,
       "first_seen": "2026-02-23",
       "last_seen": "2026-03-04"
+    },
+    {
+      "subreddit": "NaughtyWives",
+      "cnt": 11,
+      "dl": 16,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "InvitingPussy",
@@ -835,11 +889,11 @@
       "last_seen": "2026-03-03"
     },
     {
-      "subreddit": "FitNakedGirls",
+      "subreddit": "ChennaiGoneWilder",
       "cnt": 11,
-      "dl": 8,
+      "dl": 6,
       "first_seen": "2026-02-19",
-      "last_seen": "2026-03-03"
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "CamGirls",
@@ -849,18 +903,18 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "BBCparadise",
-      "cnt": 11,
-      "dl": 12,
-      "first_seen": "2026-02-21",
-      "last_seen": "2026-02-27"
-    },
-    {
       "subreddit": "AsiansGoneWild",
       "cnt": 11,
       "dl": 17,
       "first_seen": "2026-02-18",
       "last_seen": "2026-03-03"
+    },
+    {
+      "subreddit": "stockings",
+      "cnt": 10,
+      "dl": 6,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "shorthairchicks",
@@ -870,6 +924,20 @@
       "last_seen": "2026-03-03"
     },
     {
+      "subreddit": "normalnudes",
+      "cnt": 10,
+      "dl": 30,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "latinas",
+      "cnt": 10,
+      "dl": 3,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "asshole",
       "cnt": 10,
       "dl": 7,
@@ -877,25 +945,11 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "anal_gifs",
+      "subreddit": "asiangirls4whitecocks",
       "cnt": 10,
-      "dl": 0,
-      "first_seen": "2026-02-20",
-      "last_seen": "2026-03-03"
-    },
-    {
-      "subreddit": "ThickSloppyCreamy",
-      "cnt": 10,
-      "dl": 12,
-      "first_seen": "2026-02-22",
-      "last_seen": "2026-03-02"
-    },
-    {
-      "subreddit": "NaughtyWives",
-      "cnt": 10,
-      "dl": 15,
-      "first_seen": "2026-02-20",
-      "last_seen": "2026-03-04"
+      "dl": 11,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "NTR",
@@ -905,18 +959,11 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "ChennaiGoneWilder",
+      "subreddit": "IWantToFuckHerHentai",
       "cnt": 10,
-      "dl": 6,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-03-02"
-    },
-    {
-      "subreddit": "stockings",
-      "cnt": 9,
-      "dl": 6,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-03-03"
+      "dl": 9,
+      "first_seen": "2026-02-22",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "nsfwhardcore",
@@ -924,20 +971,6 @@
       "dl": 0,
       "first_seen": "2026-02-18",
       "last_seen": "2026-03-03"
-    },
-    {
-      "subreddit": "normalnudes",
-      "cnt": 9,
-      "dl": 27,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-03-03"
-    },
-    {
-      "subreddit": "lingeriewomen",
-      "cnt": 9,
-      "dl": 18,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-03-04"
     },
     {
       "subreddit": "curvy",
@@ -952,6 +985,13 @@
       "dl": 3,
       "first_seen": "2026-02-20",
       "last_seen": "2026-03-04"
+    },
+    {
+      "subreddit": "boobs",
+      "cnt": 9,
+      "dl": 12,
+      "first_seen": "2026-02-21",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "barelylegalteens",
@@ -1003,13 +1043,6 @@
       "last_seen": "2026-03-02"
     },
     {
-      "subreddit": "latinas",
-      "cnt": 8,
-      "dl": 3,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-03-04"
-    },
-    {
       "subreddit": "fuckdoll",
       "cnt": 8,
       "dl": 0,
@@ -1031,11 +1064,18 @@
       "last_seen": "2026-03-02"
     },
     {
-      "subreddit": "IWantToFuckHerHentai",
+      "subreddit": "Puffies",
       "cnt": 8,
-      "dl": 8,
-      "first_seen": "2026-02-22",
-      "last_seen": "2026-03-01"
+      "dl": 5,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "IndianHornypeople",
+      "cnt": 8,
+      "dl": 10,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "BlowJob",
@@ -1052,18 +1092,18 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "rule34",
-      "cnt": 7,
-      "dl": 8,
-      "first_seen": "2026-03-02",
-      "last_seen": "2026-03-04"
-    },
-    {
       "subreddit": "pregnantgonewild",
       "cnt": 7,
       "dl": 13,
       "first_seen": "2026-02-18",
       "last_seen": "2026-03-01"
+    },
+    {
+      "subreddit": "jav",
+      "cnt": 7,
+      "dl": 6,
+      "first_seen": "2026-02-22",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "ghostnipples",
@@ -1073,25 +1113,11 @@
       "last_seen": "2026-02-27"
     },
     {
-      "subreddit": "asiangirls4whitecocks",
-      "cnt": 7,
-      "dl": 8,
-      "first_seen": "2026-02-26",
-      "last_seen": "2026-03-03"
-    },
-    {
       "subreddit": "Telegram_Slutty",
       "cnt": 7,
       "dl": 7,
       "first_seen": "2026-02-21",
       "last_seen": "2026-03-02"
-    },
-    {
-      "subreddit": "Puffies",
-      "cnt": 7,
-      "dl": 5,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-03-04"
     },
     {
       "subreddit": "PinkishPussy",
@@ -1101,6 +1127,13 @@
       "last_seen": "2026-02-26"
     },
     {
+      "subreddit": "PerfectBody",
+      "cnt": 7,
+      "dl": 4,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "PUBLICNUDITY",
       "cnt": 7,
       "dl": 6,
@@ -1108,11 +1141,32 @@
       "last_seen": "2026-03-03"
     },
     {
+      "subreddit": "NSFW411",
+      "cnt": 7,
+      "dl": 0,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "MassiveTitsnAss",
       "cnt": 7,
       "dl": 3,
       "first_seen": "2026-02-19",
       "last_seen": "2026-03-04"
+    },
+    {
+      "subreddit": "GodPussy",
+      "cnt": 7,
+      "dl": 6,
+      "first_seen": "2026-02-21",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "DelhiGone_Wild",
+      "cnt": 7,
+      "dl": 12,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "DegradingHoles",
@@ -1127,6 +1181,13 @@
       "dl": 0,
       "first_seen": "2026-02-19",
       "last_seen": "2026-03-04"
+    },
+    {
+      "subreddit": "BraPeeking",
+      "cnt": 7,
+      "dl": 9,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "BangaloreGWild",
@@ -1150,6 +1211,13 @@
       "last_seen": "2026-03-01"
     },
     {
+      "subreddit": "pussy",
+      "cnt": 6,
+      "dl": 8,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "needysluts",
       "cnt": 6,
       "dl": 7,
@@ -1157,11 +1225,11 @@
       "last_seen": "2026-03-02"
     },
     {
-      "subreddit": "jav",
+      "subreddit": "gonewildaudio",
       "cnt": 6,
-      "dl": 6,
-      "first_seen": "2026-02-22",
-      "last_seen": "2026-02-28"
+      "dl": 0,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "Wife_Sucking_Cock",
@@ -1171,6 +1239,13 @@
       "last_seen": "2026-03-01"
     },
     {
+      "subreddit": "RealAmateursGoneWild",
+      "cnt": 6,
+      "dl": 2,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "PuneGW",
       "cnt": 6,
       "dl": 6,
@@ -1178,38 +1253,10 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "PerfectBody",
-      "cnt": 6,
-      "dl": 3,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-03-03"
-    },
-    {
-      "subreddit": "GodPussy",
-      "cnt": 6,
-      "dl": 6,
-      "first_seen": "2026-02-21",
-      "last_seen": "2026-03-01"
-    },
-    {
-      "subreddit": "DelhiGone_Wild",
-      "cnt": 6,
-      "dl": 12,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-02-28"
-    },
-    {
       "subreddit": "Cuckold",
       "cnt": 6,
       "dl": 5,
       "first_seen": "2026-02-20",
-      "last_seen": "2026-03-04"
-    },
-    {
-      "subreddit": "BraPeeking",
-      "cnt": 6,
-      "dl": 7,
-      "first_seen": "2026-02-19",
       "last_seen": "2026-03-04"
     },
     {
@@ -1225,6 +1272,13 @@
       "dl": 3,
       "first_seen": "2026-02-20",
       "last_seen": "2026-03-03"
+    },
+    {
+      "subreddit": "paag",
+      "cnt": 5,
+      "dl": 4,
+      "first_seen": "2026-02-22",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "latina_BBW",
@@ -1248,11 +1302,11 @@
       "last_seen": "2026-02-28"
     },
     {
-      "subreddit": "boobs",
+      "subreddit": "chennai_cuck_cpls",
       "cnt": 5,
-      "dl": 10,
-      "first_seen": "2026-02-21",
-      "last_seen": "2026-03-04"
+      "dl": 0,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "Telugugw",
@@ -1267,13 +1321,6 @@
       "dl": 0,
       "first_seen": "2026-02-18",
       "last_seen": "2026-03-04"
-    },
-    {
-      "subreddit": "RealAmateursGoneWild",
-      "cnt": 5,
-      "dl": 1,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-03-02"
     },
     {
       "subreddit": "PrettyLittleCumsluts",
@@ -1304,11 +1351,11 @@
       "last_seen": "2026-03-03"
     },
     {
-      "subreddit": "NSFW411",
+      "subreddit": "NavelAddict",
       "cnt": 5,
-      "dl": 0,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-03-04"
+      "dl": 4,
+      "first_seen": "2026-02-28",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "KnockoutBoobs",
@@ -1318,6 +1365,13 @@
       "last_seen": "2026-03-01"
     },
     {
+      "subreddit": "JizzedToThis",
+      "cnt": 5,
+      "dl": 0,
+      "first_seen": "2026-02-28",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "HungryButts",
       "cnt": 5,
       "dl": 3,
@@ -1325,11 +1379,25 @@
       "last_seen": "2026-02-23"
     },
     {
+      "subreddit": "HugeDickTinyChick",
+      "cnt": 5,
+      "dl": 0,
+      "first_seen": "2026-02-21",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "HighResNSFW",
       "cnt": 5,
       "dl": 9,
       "first_seen": "2026-02-19",
       "last_seen": "2026-02-26"
+    },
+    {
+      "subreddit": "HairyPussy",
+      "cnt": 5,
+      "dl": 3,
+      "first_seen": "2026-02-24",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "Exhibitionistfun",
@@ -1344,6 +1412,13 @@
       "dl": 0,
       "first_seen": "2026-02-21",
       "last_seen": "2026-02-25"
+    },
+    {
+      "subreddit": "ChooseAPornstar",
+      "cnt": 5,
+      "dl": 31,
+      "first_seen": "2026-02-21",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "ChineseGoneWild",
@@ -1402,11 +1477,18 @@
       "last_seen": "2026-03-01"
     },
     {
-      "subreddit": "pussy",
+      "subreddit": "sluttydresses",
       "cnt": 4,
-      "dl": 6,
+      "dl": 7,
+      "first_seen": "2026-02-21",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "pinayinswimsuit",
+      "cnt": 4,
+      "dl": 15,
       "first_seen": "2026-02-19",
-      "last_seen": "2026-03-03"
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "peegonewild",
@@ -1414,13 +1496,6 @@
       "dl": 2,
       "first_seen": "2026-02-24",
       "last_seen": "2026-03-02"
-    },
-    {
-      "subreddit": "paag",
-      "cnt": 4,
-      "dl": 3,
-      "first_seen": "2026-02-22",
-      "last_seen": "2026-03-01"
     },
     {
       "subreddit": "juicyasians",
@@ -1444,11 +1519,25 @@
       "last_seen": "2026-03-02"
     },
     {
-      "subreddit": "chennai_cuck_cpls",
+      "subreddit": "cumshots",
       "cnt": 4,
       "dl": 0,
+      "first_seen": "2026-02-21",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "braceface",
+      "cnt": 4,
+      "dl": 4,
       "first_seen": "2026-02-19",
-      "last_seen": "2026-02-26"
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "TwentyPlus",
+      "cnt": 4,
+      "dl": 4,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "TightAnal",
@@ -1458,11 +1547,25 @@
       "last_seen": "2026-03-04"
     },
     {
+      "subreddit": "Suckers",
+      "cnt": 4,
+      "dl": 0,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "Slutsofonlyfans",
       "cnt": 4,
       "dl": 3,
       "first_seen": "2026-02-21",
       "last_seen": "2026-02-26"
+    },
+    {
+      "subreddit": "SlimThick",
+      "cnt": 4,
+      "dl": 1,
+      "first_seen": "2026-02-21",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "SheFucksHim",
@@ -1500,13 +1603,6 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "JizzedToThis",
-      "cnt": 4,
-      "dl": 0,
-      "first_seen": "2026-02-28",
-      "last_seen": "2026-03-03"
-    },
-    {
       "subreddit": "JellyBoobsGifs",
       "cnt": 4,
       "dl": 0,
@@ -1528,31 +1624,10 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "IndianHornypeople",
-      "cnt": 4,
-      "dl": 5,
-      "first_seen": "2026-02-20",
-      "last_seen": "2026-02-28"
-    },
-    {
-      "subreddit": "HugeDickTinyChick",
-      "cnt": 4,
-      "dl": 0,
-      "first_seen": "2026-02-21",
-      "last_seen": "2026-03-02"
-    },
-    {
       "subreddit": "HotAnal",
       "cnt": 4,
       "dl": 0,
       "first_seen": "2026-02-19",
-      "last_seen": "2026-02-28"
-    },
-    {
-      "subreddit": "HairyPussy",
-      "cnt": 4,
-      "dl": 2,
-      "first_seen": "2026-02-24",
       "last_seen": "2026-02-28"
     },
     {
@@ -1591,18 +1666,18 @@
       "last_seen": "2026-02-25"
     },
     {
-      "subreddit": "ChooseAPornstar",
-      "cnt": 4,
-      "dl": 31,
-      "first_seen": "2026-02-21",
-      "last_seen": "2026-02-25"
-    },
-    {
       "subreddit": "CelebBattles",
       "cnt": 4,
       "dl": 4,
       "first_seen": "2026-02-21",
       "last_seen": "2026-03-01"
+    },
+    {
+      "subreddit": "BrownChicksWhiteDicks",
+      "cnt": 4,
+      "dl": 1,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "BraHub",
@@ -1647,13 +1722,6 @@
       "last_seen": "2026-03-03"
     },
     {
-      "subreddit": "sluttydresses",
-      "cnt": 3,
-      "dl": 6,
-      "first_seen": "2026-02-21",
-      "last_seen": "2026-03-01"
-    },
-    {
       "subreddit": "ridingxxx",
       "cnt": 3,
       "dl": 0,
@@ -1666,13 +1734,6 @@
       "dl": 3,
       "first_seen": "2026-02-18",
       "last_seen": "2026-02-22"
-    },
-    {
-      "subreddit": "pinayinswimsuit",
-      "cnt": 3,
-      "dl": 14,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-03-02"
     },
     {
       "subreddit": "obeyporn",
@@ -1710,11 +1771,11 @@
       "last_seen": "2026-02-27"
     },
     {
-      "subreddit": "gonewildaudio",
+      "subreddit": "downblouse",
       "cnt": 3,
-      "dl": 0,
-      "first_seen": "2026-02-20",
-      "last_seen": "2026-02-25"
+      "dl": 5,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "desisexywife",
@@ -1731,13 +1792,6 @@
       "last_seen": "2026-02-28"
     },
     {
-      "subreddit": "cumshots",
-      "cnt": 3,
-      "dl": 0,
-      "first_seen": "2026-02-21",
-      "last_seen": "2026-03-03"
-    },
-    {
       "subreddit": "cosplaybutts",
       "cnt": 3,
       "dl": 3,
@@ -1752,11 +1806,18 @@
       "last_seen": "2026-03-03"
     },
     {
-      "subreddit": "braceface",
+      "subreddit": "boobbounce",
       "cnt": 3,
-      "dl": 3,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-03-01"
+      "dl": 0,
+      "first_seen": "2026-02-28",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "bdsm",
+      "cnt": 3,
+      "dl": 2,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "YourPornAddiction",
@@ -1766,11 +1827,11 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "TwentyPlus",
+      "subreddit": "YogaPants",
       "cnt": 3,
-      "dl": 3,
-      "first_seen": "2026-03-02",
-      "last_seen": "2026-03-03"
+      "dl": 1,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "Threesome",
@@ -1785,13 +1846,6 @@
       "dl": 0,
       "first_seen": "2026-02-20",
       "last_seen": "2026-02-27"
-    },
-    {
-      "subreddit": "Suckers",
-      "cnt": 3,
-      "dl": 0,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-02-23"
     },
     {
       "subreddit": "SmallCutie",
@@ -1836,11 +1890,11 @@
       "last_seen": "2026-03-03"
     },
     {
-      "subreddit": "NavelAddict",
+      "subreddit": "LongPussyLips_",
       "cnt": 3,
-      "dl": 3,
-      "first_seen": "2026-02-28",
-      "last_seen": "2026-03-01"
+      "dl": 9,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "LatinaCuties",
@@ -1864,6 +1918,13 @@
       "last_seen": "2026-02-27"
     },
     {
+      "subreddit": "GothPussy",
+      "cnt": 3,
+      "dl": 3,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "DesiGoneWild",
       "cnt": 3,
       "dl": 0,
@@ -1876,13 +1937,6 @@
       "dl": 4,
       "first_seen": "2026-02-27",
       "last_seen": "2026-02-28"
-    },
-    {
-      "subreddit": "BrownChicksWhiteDicks",
-      "cnt": 3,
-      "dl": 1,
-      "first_seen": "2026-02-20",
-      "last_seen": "2026-03-03"
     },
     {
       "subreddit": "BoobsAndTities",
@@ -1920,6 +1974,13 @@
       "last_seen": "2026-03-01"
     },
     {
+      "subreddit": "porninfifteenseconds",
+      "cnt": 2,
+      "dl": 0,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "nsfw_gifs",
       "cnt": 2,
       "dl": 0,
@@ -1955,13 +2016,6 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "downblouse",
-      "cnt": 2,
-      "dl": 2,
-      "first_seen": "2026-02-26",
-      "last_seen": "2026-02-28"
-    },
-    {
       "subreddit": "cuckquean",
       "cnt": 2,
       "dl": 0,
@@ -1976,25 +2030,11 @@
       "last_seen": "2026-02-27"
     },
     {
-      "subreddit": "boobbounce",
-      "cnt": 2,
-      "dl": 0,
-      "first_seen": "2026-02-28",
-      "last_seen": "2026-03-04"
-    },
-    {
       "subreddit": "YummyBoobs",
       "cnt": 2,
       "dl": 0,
       "first_seen": "2026-02-18",
       "last_seen": "2026-02-21"
-    },
-    {
-      "subreddit": "YogaPants",
-      "cnt": 2,
-      "dl": 1,
-      "first_seen": "2026-02-25",
-      "last_seen": "2026-02-26"
     },
     {
       "subreddit": "XxxHDVideos",
@@ -2016,13 +2056,6 @@
       "dl": 0,
       "first_seen": "2026-02-23",
       "last_seen": "2026-03-03"
-    },
-    {
-      "subreddit": "SlimThick",
-      "cnt": 2,
-      "dl": 1,
-      "first_seen": "2026-02-21",
-      "last_seen": "2026-03-01"
     },
     {
       "subreddit": "ShowEverythingNSWF",
@@ -2051,6 +2084,20 @@
       "dl": 0,
       "first_seen": "2026-02-23",
       "last_seen": "2026-03-02"
+    },
+    {
+      "subreddit": "RedGIFsAnal",
+      "cnt": 2,
+      "dl": 0,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-05"
+    },
+    {
+      "subreddit": "PussyParadise_",
+      "cnt": 2,
+      "dl": 2,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "PussyGripping",
@@ -2102,13 +2149,6 @@
       "last_seen": "2026-03-01"
     },
     {
-      "subreddit": "LongPussyLips_",
-      "cnt": 2,
-      "dl": 8,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-03-03"
-    },
-    {
       "subreddit": "LabiaGW",
       "cnt": 2,
       "dl": 2,
@@ -2130,6 +2170,13 @@
       "last_seen": "2026-03-03"
     },
     {
+      "subreddit": "InnocentlyNaughty",
+      "cnt": 2,
+      "dl": 4,
+      "first_seen": "2026-02-28",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "IncestSnaps",
       "cnt": 2,
       "dl": 0,
@@ -2142,13 +2189,6 @@
       "dl": 1,
       "first_seen": "2026-02-21",
       "last_seen": "2026-02-24"
-    },
-    {
-      "subreddit": "GothPussy",
-      "cnt": 2,
-      "dl": 2,
-      "first_seen": "2026-02-25",
-      "last_seen": "2026-02-28"
     },
     {
       "subreddit": "Gonewild18",
@@ -2319,18 +2359,18 @@
       "last_seen": "2026-02-19"
     },
     {
+      "subreddit": "pussyrating",
+      "cnt": 1,
+      "dl": 1,
+      "first_seen": "2026-03-05",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "public",
       "cnt": 1,
       "dl": 1,
       "first_seen": "2026-02-18",
       "last_seen": "2026-02-18"
-    },
-    {
-      "subreddit": "porninfifteenseconds",
-      "cnt": 1,
-      "dl": 0,
-      "first_seen": "2026-02-25",
-      "last_seen": "2026-02-25"
     },
     {
       "subreddit": "porn",
@@ -2361,6 +2401,13 @@
       "last_seen": "2026-02-26"
     },
     {
+      "subreddit": "nsfwoutfits",
+      "cnt": 1,
+      "dl": 1,
+      "first_seen": "2026-03-05",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "naughtychicks",
       "cnt": 1,
       "dl": 0,
@@ -2373,6 +2420,13 @@
       "dl": 0,
       "first_seen": "2026-02-24",
       "last_seen": "2026-02-24"
+    },
+    {
+      "subreddit": "mombod",
+      "cnt": 1,
+      "dl": 1,
+      "first_seen": "2026-03-05",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "lesbianOral",
@@ -2417,6 +2471,13 @@
       "last_seen": "2026-02-21"
     },
     {
+      "subreddit": "cumontongue",
+      "cnt": 1,
+      "dl": 0,
+      "first_seen": "2026-03-05",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "cuckoldparadise",
       "cnt": 1,
       "dl": 1,
@@ -2459,18 +2520,18 @@
       "last_seen": "2026-02-21"
     },
     {
+      "subreddit": "bodyperfection",
+      "cnt": 1,
+      "dl": 1,
+      "first_seen": "2026-03-05",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "bigtitsinbikinis",
       "cnt": 1,
       "dl": 1,
       "first_seen": "2026-02-27",
       "last_seen": "2026-02-27"
-    },
-    {
-      "subreddit": "bdsm",
-      "cnt": 1,
-      "dl": 1,
-      "first_seen": "2026-02-18",
-      "last_seen": "2026-02-18"
     },
     {
       "subreddit": "asstastic",
@@ -2494,11 +2555,25 @@
       "last_seen": "2026-03-01"
     },
     {
+      "subreddit": "TwinGirls",
+      "cnt": 1,
+      "dl": 0,
+      "first_seen": "2026-03-05",
+      "last_seen": "2026-03-05"
+    },
+    {
       "subreddit": "TightShorts",
       "cnt": 1,
       "dl": 0,
       "first_seen": "2026-03-02",
       "last_seen": "2026-03-02"
+    },
+    {
+      "subreddit": "SwipeToReveal",
+      "cnt": 1,
+      "dl": 5,
+      "first_seen": "2026-03-05",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "SpreadEm",
@@ -2557,13 +2632,6 @@
       "last_seen": "2026-03-02"
     },
     {
-      "subreddit": "RedGIFsAnal",
-      "cnt": 1,
-      "dl": 0,
-      "first_seen": "2026-02-26",
-      "last_seen": "2026-02-26"
-    },
-    {
       "subreddit": "RedGIFs3some",
       "cnt": 1,
       "dl": 0,
@@ -2578,11 +2646,11 @@
       "last_seen": "2026-03-04"
     },
     {
-      "subreddit": "PussyParadise_",
+      "subreddit": "Pussy_Selfies",
       "cnt": 1,
-      "dl": 0,
-      "first_seen": "2026-02-20",
-      "last_seen": "2026-02-20"
+      "dl": 1,
+      "first_seen": "2026-03-05",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "PussyFocus",
@@ -2683,13 +2751,6 @@
       "last_seen": "2026-03-01"
     },
     {
-      "subreddit": "InnocentlyNaughty",
-      "cnt": 1,
-      "dl": 0,
-      "first_seen": "2026-02-28",
-      "last_seen": "2026-02-28"
-    },
-    {
       "subreddit": "IndianGoddess",
       "cnt": 1,
       "dl": 1,
@@ -2709,6 +2770,13 @@
       "dl": 1,
       "first_seen": "2026-02-21",
       "last_seen": "2026-02-21"
+    },
+    {
+      "subreddit": "GirlsLoveToPee",
+      "cnt": 1,
+      "dl": 20,
+      "first_seen": "2026-03-05",
+      "last_seen": "2026-03-05"
     },
     {
       "subreddit": "ForgotToPullOut",
@@ -2857,11 +2925,11 @@
     },
     {
       "hour": 6,
-      "cnt": 1069
+      "cnt": 1189
     },
     {
       "hour": 7,
-      "cnt": 1885
+      "cnt": 1965
     },
     {
       "hour": 10,
@@ -2931,7 +2999,7 @@
     },
     {
       "dow": 4,
-      "cnt": 407
+      "cnt": 607
     },
     {
       "dow": 5,
@@ -3032,6 +3100,12 @@
       "total": 200,
       "with_dl": 122,
       "files": 198
+    },
+    {
+      "fetched_date": "2026-03-05",
+      "total": 200,
+      "with_dl": 119,
+      "files": 333
     }
   ],
   "daily_stats_by_source": [
@@ -3130,13 +3204,19 @@
       "source": "home",
       "posts": 200,
       "files": 198
+    },
+    {
+      "date": "2026-03-05",
+      "source": "home",
+      "posts": 200,
+      "files": 333
     }
   ],
   "source_totals": [
     {
       "source": "home",
-      "posts": 3000,
-      "files": 3141
+      "posts": 3200,
+      "files": 3474
     },
     {
       "source": "saved",
@@ -3147,8 +3227,8 @@
   "daily_stats_top_subs": [
     {
       "subreddit": "GOONED",
-      "posts": 186,
-      "files": 646
+      "posts": 237,
+      "files": 857
     },
     {
       "subreddit": "HentaiAndRoleplayy",
@@ -3161,14 +3241,14 @@
       "files": 100
     },
     {
-      "subreddit": "ChavsGalore",
-      "posts": 29,
+      "subreddit": "NudeNonNude",
+      "posts": 49,
       "files": 97
     },
     {
-      "subreddit": "NudeNonNude",
-      "posts": 42,
-      "files": 84
+      "subreddit": "ChavsGalore",
+      "posts": 29,
+      "files": 97
     },
     {
       "subreddit": "gonewild",
@@ -3202,8 +3282,13 @@
     },
     {
       "subreddit": "KochiNSFW",
-      "posts": 58,
-      "files": 45
+      "posts": 64,
+      "files": 48
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "posts": 29,
+      "files": 36
     },
     {
       "subreddit": "PORNism",
@@ -3221,6 +3306,11 @@
       "files": 35
     },
     {
+      "subreddit": "GymGirlsNSFW",
+      "posts": 26,
+      "files": 35
+    },
+    {
       "subreddit": "ButtsAndBareFeet",
       "posts": 41,
       "files": 33
@@ -3231,14 +3321,14 @@
       "files": 32
     },
     {
-      "subreddit": "ratemyboobs",
-      "posts": 25,
+      "subreddit": "ChooseAPornstar",
+      "posts": 5,
       "files": 31
     },
     {
-      "subreddit": "ChooseAPornstar",
-      "posts": 4,
-      "files": 31
+      "subreddit": "normalnudes",
+      "posts": 10,
+      "files": 30
     },
     {
       "subreddit": "SexyButClothed",
@@ -3246,24 +3336,19 @@
       "files": 30
     },
     {
-      "subreddit": "GymGirlsNSFW",
-      "posts": 21,
-      "files": 28
-    },
-    {
       "subreddit": "FuckToyFactory",
-      "posts": 21,
-      "files": 28
-    },
-    {
-      "subreddit": "normalnudes",
-      "posts": 9,
-      "files": 27
+      "posts": 25,
+      "files": 30
     },
     {
       "subreddit": "bigasses",
       "posts": 19,
       "files": 27
+    },
+    {
+      "subreddit": "Pune_fwb_",
+      "posts": 29,
+      "files": 25
     },
     {
       "subreddit": "amihot",
@@ -3284,11 +3369,6 @@
       "subreddit": "BBW",
       "posts": 15,
       "files": 22
-    },
-    {
-      "subreddit": "Pune_fwb_",
-      "posts": 25,
-      "files": 21
     },
     {
       "subreddit": "Mumbai_GW",
@@ -3356,6 +3436,10 @@
     {
       "fetched_date": "2026-03-04",
       "cumulative": 3001
+    },
+    {
+      "fetched_date": "2026-03-05",
+      "cumulative": 3201
     }
   ],
   "posts_by_month": [
@@ -3366,8 +3450,8 @@
     },
     {
       "month": "2026-03",
-      "cnt": 801,
-      "dl": 857
+      "cnt": 1001,
+      "dl": 1190
     }
   ],
   "subreddit_heatmap": [
@@ -3437,6 +3521,11 @@
       "count": 33
     },
     {
+      "subreddit": "GOONED",
+      "date": "2026-03-05",
+      "count": 51
+    },
+    {
       "subreddit": "chubby",
       "date": "2026-02-20",
       "count": 7
@@ -3472,6 +3561,61 @@
       "count": 13
     },
     {
+      "subreddit": "KochiNSFW",
+      "date": "2026-02-18",
+      "count": 2
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "date": "2026-02-19",
+      "count": 7
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "date": "2026-02-20",
+      "count": 2
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "date": "2026-02-24",
+      "count": 5
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "date": "2026-02-25",
+      "count": 3
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "date": "2026-02-27",
+      "count": 6
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "date": "2026-03-01",
+      "count": 8
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "date": "2026-03-02",
+      "count": 6
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "date": "2026-03-03",
+      "count": 8
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "date": "2026-03-04",
+      "count": 11
+    },
+    {
+      "subreddit": "KochiNSFW",
+      "date": "2026-03-05",
+      "count": 6
+    },
+    {
       "subreddit": "smallboobs",
       "date": "2026-02-18",
       "count": 5
@@ -3552,54 +3696,49 @@
       "count": 6
     },
     {
-      "subreddit": "KochiNSFW",
+      "subreddit": "SluttyConfessions",
       "date": "2026-02-18",
-      "count": 2
+      "count": 8
     },
     {
-      "subreddit": "KochiNSFW",
-      "date": "2026-02-19",
-      "count": 7
-    },
-    {
-      "subreddit": "KochiNSFW",
+      "subreddit": "SluttyConfessions",
       "date": "2026-02-20",
-      "count": 2
+      "count": 4
     },
     {
-      "subreddit": "KochiNSFW",
+      "subreddit": "SluttyConfessions",
+      "date": "2026-02-21",
+      "count": 4
+    },
+    {
+      "subreddit": "SluttyConfessions",
+      "date": "2026-02-22",
+      "count": 3
+    },
+    {
+      "subreddit": "SluttyConfessions",
+      "date": "2026-02-23",
+      "count": 5
+    },
+    {
+      "subreddit": "SluttyConfessions",
       "date": "2026-02-24",
       "count": 5
     },
     {
-      "subreddit": "KochiNSFW",
-      "date": "2026-02-25",
-      "count": 3
-    },
-    {
-      "subreddit": "KochiNSFW",
-      "date": "2026-02-27",
-      "count": 6
-    },
-    {
-      "subreddit": "KochiNSFW",
-      "date": "2026-03-01",
-      "count": 8
-    },
-    {
-      "subreddit": "KochiNSFW",
-      "date": "2026-03-02",
-      "count": 6
-    },
-    {
-      "subreddit": "KochiNSFW",
-      "date": "2026-03-03",
-      "count": 8
-    },
-    {
-      "subreddit": "KochiNSFW",
-      "date": "2026-03-04",
+      "subreddit": "SluttyConfessions",
+      "date": "2026-02-26",
       "count": 11
+    },
+    {
+      "subreddit": "SluttyConfessions",
+      "date": "2026-03-03",
+      "count": 10
+    },
+    {
+      "subreddit": "SluttyConfessions",
+      "date": "2026-03-05",
+      "count": 7
     },
     {
       "subreddit": "gonewild",
@@ -3622,44 +3761,44 @@
       "count": 17
     },
     {
-      "subreddit": "SluttyConfessions",
-      "date": "2026-02-18",
-      "count": 8
-    },
-    {
-      "subreddit": "SluttyConfessions",
-      "date": "2026-02-20",
-      "count": 4
-    },
-    {
-      "subreddit": "SluttyConfessions",
+      "subreddit": "NudeNonNude",
       "date": "2026-02-21",
+      "count": 10
+    },
+    {
+      "subreddit": "NudeNonNude",
+      "date": "2026-02-23",
       "count": 4
     },
     {
-      "subreddit": "SluttyConfessions",
-      "date": "2026-02-22",
-      "count": 3
-    },
-    {
-      "subreddit": "SluttyConfessions",
-      "date": "2026-02-23",
-      "count": 5
-    },
-    {
-      "subreddit": "SluttyConfessions",
+      "subreddit": "NudeNonNude",
       "date": "2026-02-24",
+      "count": 4
+    },
+    {
+      "subreddit": "NudeNonNude",
+      "date": "2026-02-26",
+      "count": 4
+    },
+    {
+      "subreddit": "NudeNonNude",
+      "date": "2026-02-27",
       "count": 5
     },
     {
-      "subreddit": "SluttyConfessions",
-      "date": "2026-02-26",
-      "count": 11
+      "subreddit": "NudeNonNude",
+      "date": "2026-02-28",
+      "count": 9
     },
     {
-      "subreddit": "SluttyConfessions",
-      "date": "2026-03-03",
-      "count": 10
+      "subreddit": "NudeNonNude",
+      "date": "2026-03-01",
+      "count": 6
+    },
+    {
+      "subreddit": "NudeNonNude",
+      "date": "2026-03-05",
+      "count": 7
     },
     {
       "subreddit": "AmIFuckWorthy",
@@ -3697,41 +3836,6 @@
       "count": 5
     },
     {
-      "subreddit": "NudeNonNude",
-      "date": "2026-02-21",
-      "count": 10
-    },
-    {
-      "subreddit": "NudeNonNude",
-      "date": "2026-02-23",
-      "count": 4
-    },
-    {
-      "subreddit": "NudeNonNude",
-      "date": "2026-02-24",
-      "count": 4
-    },
-    {
-      "subreddit": "NudeNonNude",
-      "date": "2026-02-26",
-      "count": 4
-    },
-    {
-      "subreddit": "NudeNonNude",
-      "date": "2026-02-27",
-      "count": 5
-    },
-    {
-      "subreddit": "NudeNonNude",
-      "date": "2026-02-28",
-      "count": 9
-    },
-    {
-      "subreddit": "NudeNonNude",
-      "date": "2026-03-01",
-      "count": 6
-    },
-    {
       "subreddit": "ButtsAndBareFeet",
       "date": "2026-02-18",
       "count": 5
@@ -3812,6 +3916,11 @@
       "count": 3
     },
     {
+      "subreddit": "TittyDrop",
+      "date": "2026-03-05",
+      "count": 3
+    },
+    {
       "subreddit": "SexyButClothed",
       "date": "2026-02-18",
       "count": 3
@@ -3860,81 +3969,6 @@
       "subreddit": "SexyButClothed",
       "date": "2026-03-04",
       "count": 4
-    },
-    {
-      "subreddit": "ThickThighs",
-      "date": "2026-02-19",
-      "count": 2
-    },
-    {
-      "subreddit": "ThickThighs",
-      "date": "2026-02-21",
-      "count": 2
-    },
-    {
-      "subreddit": "ThickThighs",
-      "date": "2026-02-22",
-      "count": 4
-    },
-    {
-      "subreddit": "ThickThighs",
-      "date": "2026-02-24",
-      "count": 6
-    },
-    {
-      "subreddit": "ThickThighs",
-      "date": "2026-02-25",
-      "count": 7
-    },
-    {
-      "subreddit": "ThickThighs",
-      "date": "2026-02-26",
-      "count": 6
-    },
-    {
-      "subreddit": "ThickThighs",
-      "date": "2026-02-28",
-      "count": 2
-    },
-    {
-      "subreddit": "ChavsGalore",
-      "date": "2026-02-19",
-      "count": 2
-    },
-    {
-      "subreddit": "ChavsGalore",
-      "date": "2026-02-20",
-      "count": 3
-    },
-    {
-      "subreddit": "ChavsGalore",
-      "date": "2026-02-22",
-      "count": 2
-    },
-    {
-      "subreddit": "ChavsGalore",
-      "date": "2026-02-24",
-      "count": 2
-    },
-    {
-      "subreddit": "ChavsGalore",
-      "date": "2026-02-25",
-      "count": 6
-    },
-    {
-      "subreddit": "ChavsGalore",
-      "date": "2026-02-27",
-      "count": 5
-    },
-    {
-      "subreddit": "ChavsGalore",
-      "date": "2026-03-02",
-      "count": 4
-    },
-    {
-      "subreddit": "ChavsGalore",
-      "date": "2026-03-04",
-      "count": 5
     },
     {
       "subreddit": "GirlsGW",
@@ -3974,6 +4008,201 @@
     {
       "subreddit": "GirlsGW",
       "date": "2026-03-03",
+      "count": 5
+    },
+    {
+      "subreddit": "GirlsGW",
+      "date": "2026-03-05",
+      "count": 2
+    },
+    {
+      "subreddit": "tiktoknsfw",
+      "date": "2026-02-18",
+      "count": 4
+    },
+    {
+      "subreddit": "tiktoknsfw",
+      "date": "2026-02-24",
+      "count": 4
+    },
+    {
+      "subreddit": "tiktoknsfw",
+      "date": "2026-02-25",
+      "count": 3
+    },
+    {
+      "subreddit": "tiktoknsfw",
+      "date": "2026-02-26",
+      "count": 3
+    },
+    {
+      "subreddit": "tiktoknsfw",
+      "date": "2026-02-27",
+      "count": 1
+    },
+    {
+      "subreddit": "tiktoknsfw",
+      "date": "2026-03-01",
+      "count": 6
+    },
+    {
+      "subreddit": "tiktoknsfw",
+      "date": "2026-03-02",
+      "count": 3
+    },
+    {
+      "subreddit": "tiktoknsfw",
+      "date": "2026-03-04",
+      "count": 3
+    },
+    {
+      "subreddit": "tiktoknsfw",
+      "date": "2026-03-05",
+      "count": 2
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "date": "2026-02-22",
+      "count": 2
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "date": "2026-02-23",
+      "count": 1
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "date": "2026-02-24",
+      "count": 3
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "date": "2026-02-25",
+      "count": 3
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "date": "2026-02-26",
+      "count": 2
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "date": "2026-02-27",
+      "count": 6
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "date": "2026-03-02",
+      "count": 4
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "date": "2026-03-04",
+      "count": 4
+    },
+    {
+      "subreddit": "ratemyboobs",
+      "date": "2026-03-05",
+      "count": 4
+    },
+    {
+      "subreddit": "ThickThighs",
+      "date": "2026-02-19",
+      "count": 2
+    },
+    {
+      "subreddit": "ThickThighs",
+      "date": "2026-02-21",
+      "count": 2
+    },
+    {
+      "subreddit": "ThickThighs",
+      "date": "2026-02-22",
+      "count": 4
+    },
+    {
+      "subreddit": "ThickThighs",
+      "date": "2026-02-24",
+      "count": 6
+    },
+    {
+      "subreddit": "ThickThighs",
+      "date": "2026-02-25",
+      "count": 7
+    },
+    {
+      "subreddit": "ThickThighs",
+      "date": "2026-02-26",
+      "count": 6
+    },
+    {
+      "subreddit": "ThickThighs",
+      "date": "2026-02-28",
+      "count": 2
+    },
+    {
+      "subreddit": "Pune_fwb_",
+      "date": "2026-02-19",
+      "count": 9
+    },
+    {
+      "subreddit": "Pune_fwb_",
+      "date": "2026-02-22",
+      "count": 5
+    },
+    {
+      "subreddit": "Pune_fwb_",
+      "date": "2026-02-24",
+      "count": 5
+    },
+    {
+      "subreddit": "Pune_fwb_",
+      "date": "2026-02-25",
+      "count": 6
+    },
+    {
+      "subreddit": "Pune_fwb_",
+      "date": "2026-03-05",
+      "count": 4
+    },
+    {
+      "subreddit": "ChavsGalore",
+      "date": "2026-02-19",
+      "count": 2
+    },
+    {
+      "subreddit": "ChavsGalore",
+      "date": "2026-02-20",
+      "count": 3
+    },
+    {
+      "subreddit": "ChavsGalore",
+      "date": "2026-02-22",
+      "count": 2
+    },
+    {
+      "subreddit": "ChavsGalore",
+      "date": "2026-02-24",
+      "count": 2
+    },
+    {
+      "subreddit": "ChavsGalore",
+      "date": "2026-02-25",
+      "count": 6
+    },
+    {
+      "subreddit": "ChavsGalore",
+      "date": "2026-02-27",
+      "count": 5
+    },
+    {
+      "subreddit": "ChavsGalore",
+      "date": "2026-03-02",
+      "count": 4
+    },
+    {
+      "subreddit": "ChavsGalore",
+      "date": "2026-03-04",
       "count": 5
     },
     {
@@ -4005,138 +4234,18 @@
       "subreddit": "DesiNSFWSubs",
       "date": "2026-03-04",
       "count": 1
-    },
-    {
-      "subreddit": "BornToBeBreed",
-      "date": "2026-02-18",
-      "count": 4
-    },
-    {
-      "subreddit": "BornToBeBreed",
-      "date": "2026-02-19",
-      "count": 1
-    },
-    {
-      "subreddit": "BornToBeBreed",
-      "date": "2026-02-20",
-      "count": 3
-    },
-    {
-      "subreddit": "BornToBeBreed",
-      "date": "2026-02-21",
-      "count": 5
-    },
-    {
-      "subreddit": "BornToBeBreed",
-      "date": "2026-02-22",
-      "count": 1
-    },
-    {
-      "subreddit": "BornToBeBreed",
-      "date": "2026-02-23",
-      "count": 6
-    },
-    {
-      "subreddit": "BornToBeBreed",
-      "date": "2026-02-25",
-      "count": 2
-    },
-    {
-      "subreddit": "BornToBeBreed",
-      "date": "2026-03-02",
-      "count": 2
-    },
-    {
-      "subreddit": "BornToBeBreed",
-      "date": "2026-03-04",
-      "count": 4
-    },
-    {
-      "subreddit": "tiktoknsfw",
-      "date": "2026-02-18",
-      "count": 4
-    },
-    {
-      "subreddit": "tiktoknsfw",
-      "date": "2026-02-24",
-      "count": 4
-    },
-    {
-      "subreddit": "tiktoknsfw",
-      "date": "2026-02-25",
-      "count": 3
-    },
-    {
-      "subreddit": "tiktoknsfw",
-      "date": "2026-02-26",
-      "count": 3
-    },
-    {
-      "subreddit": "tiktoknsfw",
-      "date": "2026-02-27",
-      "count": 1
-    },
-    {
-      "subreddit": "tiktoknsfw",
-      "date": "2026-03-01",
-      "count": 6
-    },
-    {
-      "subreddit": "tiktoknsfw",
-      "date": "2026-03-02",
-      "count": 3
-    },
-    {
-      "subreddit": "tiktoknsfw",
-      "date": "2026-03-04",
-      "count": 3
-    },
-    {
-      "subreddit": "ratemyboobs",
-      "date": "2026-02-22",
-      "count": 2
-    },
-    {
-      "subreddit": "ratemyboobs",
-      "date": "2026-02-23",
-      "count": 1
-    },
-    {
-      "subreddit": "ratemyboobs",
-      "date": "2026-02-24",
-      "count": 3
-    },
-    {
-      "subreddit": "ratemyboobs",
-      "date": "2026-02-25",
-      "count": 3
-    },
-    {
-      "subreddit": "ratemyboobs",
-      "date": "2026-02-26",
-      "count": 2
-    },
-    {
-      "subreddit": "ratemyboobs",
-      "date": "2026-02-27",
-      "count": 6
-    },
-    {
-      "subreddit": "ratemyboobs",
-      "date": "2026-03-02",
-      "count": 4
-    },
-    {
-      "subreddit": "ratemyboobs",
-      "date": "2026-03-04",
-      "count": 4
     }
   ],
   "media_split": {
-    "with_media": 1708,
-    "without_media": 1293
+    "with_media": 1827,
+    "without_media": 1374
   },
   "avg_downloads_per_sub": [
+    {
+      "subreddit": "ChooseAPornstar",
+      "cnt": 5,
+      "avg_dl": 6.2
+    },
     {
       "subreddit": "NTR",
       "cnt": 10,
@@ -4144,8 +4253,8 @@
     },
     {
       "subreddit": "GOONED",
-      "cnt": 186,
-      "avg_dl": 3.47
+      "cnt": 237,
+      "avg_dl": 3.62
     },
     {
       "subreddit": "ChavsGalore",
@@ -4159,7 +4268,7 @@
     },
     {
       "subreddit": "normalnudes",
-      "cnt": 9,
+      "cnt": 10,
       "avg_dl": 3.0
     },
     {
@@ -4173,29 +4282,14 @@
       "avg_dl": 2.5
     },
     {
-      "subreddit": "lingeriewomen",
-      "cnt": 9,
-      "avg_dl": 2.0
-    },
-    {
       "subreddit": "latina_BBW",
       "cnt": 5,
       "avg_dl": 2.0
     },
     {
-      "subreddit": "boobs",
-      "cnt": 5,
-      "avg_dl": 2.0
-    },
-    {
       "subreddit": "NudeNonNude",
-      "cnt": 42,
-      "avg_dl": 2.0
-    },
-    {
-      "subreddit": "DelhiGone_Wild",
-      "cnt": 6,
-      "avg_dl": 2.0
+      "cnt": 49,
+      "avg_dl": 1.98
     },
     {
       "subreddit": "pregnantgonewild",
@@ -4208,6 +4302,11 @@
       "avg_dl": 1.86
     },
     {
+      "subreddit": "lingeriewomen",
+      "cnt": 11,
+      "avg_dl": 1.82
+    },
+    {
       "subreddit": "HighResNSFW",
       "cnt": 5,
       "avg_dl": 1.8
@@ -4216,6 +4315,11 @@
       "subreddit": "Normalnudesgonewild",
       "cnt": 20,
       "avg_dl": 1.75
+    },
+    {
+      "subreddit": "DelhiGone_Wild",
+      "cnt": 7,
+      "avg_dl": 1.71
     },
     {
       "subreddit": "BangaloreGWild",
@@ -4253,14 +4357,14 @@
       "avg_dl": 1.54
     },
     {
-      "subreddit": "NaughtyWives",
-      "cnt": 10,
-      "avg_dl": 1.5
-    },
-    {
       "subreddit": "BBW",
       "cnt": 15,
       "avg_dl": 1.47
+    },
+    {
+      "subreddit": "NaughtyWives",
+      "cnt": 11,
+      "avg_dl": 1.45
     },
     {
       "subreddit": "gonewild",
